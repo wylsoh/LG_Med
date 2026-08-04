@@ -51,6 +51,12 @@ if __name__ == '__main__':
     dl_train = DataLoader(ds_train, batch_size=args.train_batch_size, shuffle=True, num_workers=args.train_batch_size)
     dl_valid = DataLoader(ds_valid, batch_size=args.valid_batch_size, shuffle=False, num_workers=args.valid_batch_size)
 
+    if not hasattr(args, 'lr'):
+        args.lr = 0.0003 # 对应你 yaml 里的默认值
+
+    if hasattr(args, 'TRAIN') and 'lr' in args.TRAIN:
+        args.lr = args.TRAIN['lr']
+
     model = LanGuideMedSegWrapper(args)
 
     ## 1. setting recall function
