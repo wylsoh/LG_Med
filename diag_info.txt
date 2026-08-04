@@ -1,0 +1,6 @@
+全局配置:
+(空)
+---
+SSH目录存在: True
+SSH文件: ['known_hosts', 'authorized_keys', 'known_hosts.old']
+credential.helper: ''
