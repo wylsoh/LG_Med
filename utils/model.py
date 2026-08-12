@@ -1,10 +1,12 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from einops import rearrange, repeat
 from .layers import GuideDecoder
 from monai.networks.blocks.dynunet_block import UnetOutBlock
 from monai.networks.blocks.upsample import SubpixelUpsample
 from transformers import AutoTokenizer, AutoModel
+from .aux_head import AuxHeads
 
 
 
@@ -55,9 +57,11 @@ class VisionModel(nn.Module):
 
 class LanGuideMedSeg(nn.Module):
 
-    def __init__(self, bert_type, vision_type, project_dim=512):
+    def __init__(self, bert_type, vision_type, project_dim=512, use_aux=False):
 
         super(LanGuideMedSeg, self).__init__()
+
+        self.use_aux = use_aux
 
         self.encoder = VisionModel(vision_type, project_dim)
         self.text_encoder = BERTModel(bert_type, project_dim)
@@ -70,6 +74,10 @@ class LanGuideMedSeg(nn.Module):
         self.decoder4 = GuideDecoder(feature_dim[2],feature_dim[3],self.spatial_dim[2],9)
         self.decoder1 = SubpixelUpsample(2,feature_dim[3],24,4)
         self.out = UnetOutBlock(2, in_channels=24, out_channels=1)
+
+        if use_aux:
+            # aux heads take the pooled decoder feature (feature_dim[-1] = 96)
+            self.aux_head = AuxHeads(in_dim=feature_dim[3], hidden=128)
 
     def forward(self, data):
 
@@ -91,9 +99,17 @@ class LanGuideMedSeg(nn.Module):
         os8 = self.decoder8(os16,image_features[1], text_embeds[-1])
         os4 = self.decoder4(os8,image_features[0], text_embeds[-1])
         os4 = rearrange(os4, 'B (H W) C -> B C H W',H=self.spatial_dim[-1],W=self.spatial_dim[-1])
+
+        aux_logits = None
+        if self.use_aux:
+            pooled = F.adaptive_avg_pool2d(os4, 1).flatten(1)  # B, 96
+            aux_logits = self.aux_head(pooled)
+
         os1 = self.decoder1(os4)
 
         out = self.out(os1).sigmoid()
 
+        if self.use_aux:
+            return out, aux_logits
         return out
     

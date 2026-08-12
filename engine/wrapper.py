@@ -16,12 +16,18 @@ class LanGuideMedSegWrapper(pl.LightningModule):
     def __init__(self, args):
         
         super(LanGuideMedSegWrapper, self).__init__()
+
+        self.use_aux = getattr(args, 'use_aux', False)
+        self.aux_weight = getattr(args, 'aux_weight', 1.0)
         
-        self.model = LanGuideMedSeg(args.bert_type, args.vision_type, args.project_dim)
+        self.model = LanGuideMedSeg(args.bert_type, args.vision_type, args.project_dim,
+                                    use_aux=self.use_aux)
         self.lr = args.lr
         self.history = {}
         
         self.loss_fn = DiceCELoss()
+        if self.use_aux:
+            self.aux_ce = nn.CrossEntropyLoss(ignore_index=-100)
 
         metrics_dict = {"acc":Accuracy(task='binary'),"dice":Dice(),"MIoU":BinaryJaccardIndex()}
         self.train_metrics = nn.ModuleDict(metrics_dict)
@@ -44,9 +50,50 @@ class LanGuideMedSegWrapper(pl.LightningModule):
 
     def shared_step(self,batch,batch_idx):
         x, y = batch
-        preds = self(x)
-        loss = self.loss_fn(preds,y)
-        return {'loss': loss, 'preds': preds.detach(), 'y': y.detach()}    
+        out = self(x)
+        if self.use_aux:
+            preds, aux_logits = out
+            loss = self.loss_fn(preds, y)
+            aux_loss = self._aux_loss(aux_logits, x[1]['attrs'])
+            self.log('aux_loss', aux_loss, prog_bar=True, batch_size=y.size(0))
+            loss = loss + self.aux_weight * aux_loss
+        else:
+            preds = out
+            loss = self.loss_fn(preds, y)
+        return {'loss': loss, 'preds': preds.detach(), 'y': y.detach()}
+
+    def _aux_loss(self, logits, attrs):
+        """Combined auxiliary attribute loss (masked BCE / CE with ignore)."""
+        device = logits['nature'].device
+        losses = []
+
+        # nature: 2-class, per-sample masked BCE
+        m = attrs['nature_ok'].to(device)
+        if m.any():
+            t = torch.nn.functional.one_hot(
+                attrs['nature'].to(device), num_classes=2).float()
+            l = torch.nn.functional.binary_cross_entropy_with_logits(
+                logits['nature'], t, reduction='none').mean(-1)
+            losses.append((l * m).sum() / m.sum())
+
+        # quantity: 4-class CE with ignore_index
+        m = attrs['quantity_ok'].to(device)
+        if m.any():
+            t = attrs['quantity'].to(device).long()
+            t = torch.where(m, t, torch.full_like(t, -100))
+            losses.append(self.aux_ce(logits['quantity'], t))
+
+        # location: 6-dim multi-hot, per-sample masked BCE
+        m = attrs['location_ok'].to(device)
+        if m.any():
+            l = torch.nn.functional.binary_cross_entropy_with_logits(
+                logits['location'], attrs['location'].to(device),
+                reduction='none').mean(-1)
+            losses.append((l * m).sum() / m.sum())
+
+        if not losses:
+            return torch.zeros((), device=device)
+        return torch.stack(losses).mean()
     
     def training_step(self, batch, batch_idx):
         return self.shared_step(batch,batch_idx)

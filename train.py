@@ -35,17 +35,30 @@ if __name__ == '__main__':
     args = get_parser()
     print("cuda:",torch.cuda.is_available())
 
+    return_attrs = getattr(args, 'use_aux', False)
+
     ds_train = QaTa(csv_path=args.train_csv_path,
                     root_path=args.train_root_path,
                     tokenizer=args.bert_type,
                     image_size=args.image_size,
-                    mode='train')
+                    mode='train',
+                    return_attrs=return_attrs)
 
     ds_valid = QaTa(csv_path=args.train_csv_path,
                     root_path=args.train_root_path,
                     tokenizer=args.bert_type,
                     image_size=args.image_size,
-                    mode='valid')
+                    mode='valid',
+                    return_attrs=return_attrs)
+
+    # ---- experiment: reduced text variants (no-op unless text_mode != 'full') ----
+    text_mode = getattr(args, 'text_mode', 'full')
+    if text_mode != 'full':
+        from utils.text_process import process_caption
+        ds_train.caption_list = [process_caption(c, text_mode) for c in ds_train.caption_list]
+        ds_valid.caption_list = [process_caption(c, text_mode) for c in ds_valid.caption_list]
+        print(f'[EXP] text_mode={text_mode}: train={len(ds_train.caption_list)} '
+              f'valid={len(ds_valid.caption_list)}')
 
 
     dl_train = DataLoader(ds_train, batch_size=args.train_batch_size, shuffle=True, num_workers=args.train_batch_size)

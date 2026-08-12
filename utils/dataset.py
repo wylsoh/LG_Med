@@ -6,10 +6,11 @@ from monai.transforms import (AddChanneld, Compose, Lambdad, NormalizeIntensityd
                               Resized, ToTensord, LoadImaged, EnsureChannelFirstd)
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer
+from utils.text_process import parse_caption, to_labels
 
 class QaTa(Dataset):
 
-    def __init__(self, csv_path=None, root_path=None, tokenizer=None, mode='train',image_size=[224,224]):
+    def __init__(self, csv_path=None, root_path=None, tokenizer=None, mode='train',image_size=[224,224], return_attrs=False):
 
         super(QaTa, self).__init__()
 
@@ -31,6 +32,11 @@ class QaTa(Dataset):
 
         self.root_path = root_path
         self.image_size = image_size
+
+        self.return_attrs = return_attrs
+        if return_attrs:
+            # pre-parse attribute labels (nature / quantity / location zones)
+            self.attr_list = [to_labels(parse_caption(c)) for c in self.caption_list]
 
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer, trust_remote_code=True)
 
@@ -59,6 +65,17 @@ class QaTa(Dataset):
         image,gt,token,mask = data['image'],data['gt'],data['token'],data['mask']
         gt = torch.where(gt==255,1,0)
         text = {'input_ids':token.squeeze(dim=0), 'attention_mask':mask.squeeze(dim=0)} 
+
+        if self.return_attrs:
+            a = self.attr_list[idx]
+            text['attrs'] = {
+                'nature': torch.tensor(0 if a['nature'] is None else a['nature'], dtype=torch.long),
+                'nature_ok': torch.tensor(bool(a['nature_ok']), dtype=torch.bool),
+                'quantity': torch.tensor(0 if a['quantity'] is None else a['quantity'], dtype=torch.long),
+                'quantity_ok': torch.tensor(bool(a['quantity_ok']), dtype=torch.bool),
+                'location': torch.tensor(a['location'], dtype=torch.float),
+                'location_ok': torch.tensor(bool(a['location_ok']), dtype=torch.bool),
+            }
 
         return ([image, text], gt)
 
