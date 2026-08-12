@@ -63,16 +63,14 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 
 ## 3. 结果
 
-> 训练进行中…(记录 val/test 的 loss/acc/dice/MIoU)
+> 记录 val/test 的 loss/acc/dice/MIoU。模型按 val_loss 选最优(early stopping patience=20)。
 
-| 实验 | 分支 | 配置 | val_dice | val_MIoU | test_dice | test_MIoU | 备注 |
-|---|---|---|---|---|---|---|---|
-| E1 full | text-ablation | config/exp/full.yaml | 训练中… | | | | 基线 |
-| E2 location | text-ablation | config/exp/location.yaml | 训练中… | | | | 期望最优 |
+| 实验 | 分支 | 配置 | 最佳val_loss(epoch) | val_dice | val_MIoU | test_dice | test_MIoU | 备注 |
+|---|---|---|---|---|---|---|---|---|
+| E1 full | text-ablation | config/exp/full.yaml | 0.2126 (30) | 0.8613 | 0.7564 | 待评估 | | 基线,epoch50 早停 |
+| E2 location | text-ablation | config/exp/location.yaml | 训练中… | | | | | 期望最优 |
 
-**早期信号(epoch 3)**:
-- E1(full):val_dice **0.811** / val_MIoU 0.682
-- E2(location):val_dice **0.820** / val_MIoU 0.695
+> ⚠️ 早期观察:E1(full)的 best val_loss(0.2126)目前低于 E2(location)(0.2194),与论文"方位句最优"在 val 指标上不一致。**论文 Table 1 用的是测试集(evaluate.py)**,故最终结论以 test_dice/test_MIoU 为准——二者对比是核心。
 
 ---
 
