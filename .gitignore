@@ -24,3 +24,6 @@ env/
 .idea/
 .vscode/
 .DS_Store
+# 实验日志与输出
+lightning_logs/
+logs/
