@@ -72,7 +72,7 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 | E3 nature | text-ablation | config/exp/nature.yaml | 0.2812 (39) | 0.7991 | 0.6655 | 0.8273 | — | epoch59 早停 |
 | E4 quantity | text-ablation | config/exp/quantity.yaml | 0.2846 (50) | 0.7964 | 0.6616 | 0.8308 | — | epoch70 早停 |
 | E5 keyword | text-ablation | config/exp/keyword.yaml | 0.2161 (39) | 0.8579 | 0.7512 | 0.8881 | — | epoch59 早停 |
-| E6 aux_full | aux-supervision | config/exp/aux_full.yaml | 训练中… | | | | | |
+| E6 aux_full | aux-supervision | config/exp/aux_full.yaml | 0.2243 (40) | 0.8596 | 0.7538 | 0.8919 | — | epoch60 早停,关键词监督未提升 |
 | E7 aux_location | aux-supervision | config/exp/aux_location.yaml | 训练中… | | | | | |
 
 > ⚠️ **关键发现(截至 E1-E5)**:
