@@ -69,14 +69,17 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 |---|---|---|---|---|---|---|---|---|
 | E1 full | text-ablation | config/exp/full.yaml | 0.2126 (30) | 0.8613 | 0.7564 | **0.8947** | **0.8094** | 基线,epoch50 早停 |
 | E2 location | text-ablation | config/exp/location.yaml | 0.2194 (33) | 0.8586 | 0.7522 | 0.8897 | 0.8014 | epoch53 早停 |
-| E3 nature | text-ablation | config/exp/nature.yaml | 训练中… | | | | | |
+| E3 nature | text-ablation | config/exp/nature.yaml | 0.2812 (39) | 0.7991 | 0.6655 | 0.8273 | — | epoch59 早停 |
 | E4 quantity | text-ablation | config/exp/quantity.yaml | 训练中… | | | | | |
+| E5 keyword | text-ablation | config/exp/keyword.yaml | 训练中… | | | | | |
 
-> ⚠️ **关键发现**:在**验证集和测试集**上,**E1(full 完整三句)都略优于 E2(location 仅方位句)**
-> (test_dice 0.8947 vs 0.8897,test_MIoU 0.8094 vs 0.8014)。
-> 这与原始论文「单独使用 stage3(方位句)效果最好」的结论**不一致**。
-> 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式不同、或该现象在本数据集不复现。
-> 待 E3/E4/E5 完成,判断 location 是否仍是最有信息量的**单句**(论文另一层结论)。
+> ⚠️ **关键发现**:
+> 1. **完整三句(full)在 val/test 上均优于任何单句**——与论文「stage3 单独最优」不一致。
+> 2. 但**方位句(location)确实是信息量最大的单句**(val_dice 0.8586 vs nature 0.7991),
+>    部分支持论文「方位最有信息量」的结论。
+> 3. 即:方位句最有用,但**完整三句仍然更好**——「更少文本反而更好」的现象在本数据集未复现。
+> 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
+> 待 E4/E5/E6/E7 完成以补全曲线。
 
 ---
 
