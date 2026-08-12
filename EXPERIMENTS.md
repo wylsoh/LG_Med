@@ -70,14 +70,23 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 | E1 full | text-ablation | config/exp/full.yaml | 0.2126 (30) | 0.8613 | 0.7564 | **0.8947** | **0.8094** | 基线,epoch50 早停 |
 | E2 location | text-ablation | config/exp/location.yaml | 0.2194 (33) | 0.8586 | 0.7522 | 0.8897 | 0.8014 | epoch53 早停 |
 | E3 nature | text-ablation | config/exp/nature.yaml | 0.2812 (39) | 0.7991 | 0.6655 | 0.8273 | — | epoch59 早停 |
-| E4 quantity | text-ablation | config/exp/quantity.yaml | 训练中… | | | | | |
-| E5 keyword | text-ablation | config/exp/keyword.yaml | 训练中… | | | | | |
+| E4 quantity | text-ablation | config/exp/quantity.yaml | 0.2846 (50) | 0.7964 | 0.6616 | 0.8308 | — | epoch70 早停 |
+| E5 keyword | text-ablation | config/exp/keyword.yaml | 0.2161 (39) | 0.8579 | 0.7512 | 0.8881 | — | epoch59 早停 |
+| E8 kw_nature | text-ablation | config/exp/kw_nature.yaml | 0.2873 (49) | 0.7931 | 0.6571 | 0.8328 | — | epoch69 早停,仅性质词 |
+| E9 kw_quantity | text-ablation | config/exp/kw_quantity.yaml | 训练中… | | | | | 仅数量词 |
+| E10 kw_location | text-ablation | config/exp/kw_location.yaml | 训练中… | | | | | 仅方位短语 |
+| E6 aux_full | aux-supervision | config/exp/aux_full.yaml | 0.2243 (40) | 0.8596 | 0.7538 | 0.8919 | — | aux 监督未提升 |
+| E7 aux_location | aux-supervision | config/exp/aux_location.yaml | 0.2894 (34) | 0.8480 | 0.7360 | 0.8755 | — | aux 监督未提升 |
 
-> ⚠️ **关键发现**:
+> ⚠️ **关键发现(截至 E1-E8)**:
 > 1. **完整三句(full)在 val/test 上均优于任何单句**——与论文「stage3 单独最优」不一致。
-> 2. 但**方位句(location)确实是信息量最大的单句**(val_dice 0.8586 vs nature 0.7991),
->    部分支持论文「方位最有信息量」的结论。
-> 3. 即:方位句最有用,但**完整三句仍然更好**——「更少文本反而更好」的现象在本数据集未复现。
+> 2. **方位(location)与结构化关键词(keyword)效果几乎相同**(test_dice 0.8897 / 0.8881),
+>    而性质(nature 0.8273)与数量(quantity 0.8308)明显更差。
+>    → **分割性能主要由「方位」信息驱动**;nature/quantity 单独几乎无助于分割。
+> 3. **单性质关键词 E8(0.8328)与性质句 E3(0.8273)接近**;单数量/单方位(E9/E10)待出。
+> 4. **关键词监督辅助损失无益**(E6/E7 均低于对应无辅助版本)。
+> 5. 即:「更少文本反而更好」的现象在本数据集**未复现**;完整三句仍最优。
+> 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
 > 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
 > 待 E4/E5/E6/E7 完成以补全曲线。
 
