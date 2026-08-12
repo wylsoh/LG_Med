@@ -25,7 +25,11 @@ _SIDE_PREFIX = {"left": "L", "right": "R"}
 _VERTICALS = ("upper", "middle", "lower")
 
 # Supported text modes for build_variant()
-MODES = ("full", "nature", "quantity", "location", "keyword")
+MODES = ("full", "nature", "quantity", "location", "keyword",
+         "kw_nature", "kw_quantity", "kw_location")
+
+# Reverse map: quantity int -> number word (for single-keyword variants)
+_QUANTITY_WORDS = {1: "one", 2: "two", 3: "three", 4: "four"}
 
 # ---------------------------------------------------------------------------
 # Regexes (all case-insensitive, robust to spacing issues)
@@ -133,11 +137,14 @@ def build_variant(parsed: Dict, mode: str = "full") -> str:
     """Build a reduced text variant for the given mode.
 
     mode:
-      full     -> original caption (baseline)
-      nature   -> first sentence only  ("bilateral pulmonary infection")
-      quantity -> second sentence only ("two infected areas")
-      location -> third sentence only  ("all left lung and middle lower right lung.")
-      keyword  -> compact structured   ("bilateral 2 middle lower right lung")
+      full        -> original caption (baseline)
+      nature      -> first sentence only   ("bilateral pulmonary infection")
+      quantity    -> second sentence only  ("2 infected area(s)")
+      location    -> third sentence only   ("all left lung and middle lower right lung.")
+      keyword     -> compact structured    ("bilateral, 2, all left lung and middle lower right lung.")
+      kw_nature   -> single nature keyword ("bilateral")
+      kw_quantity -> single quantity keyword ("two")
+      kw_location -> single location keyword ("lower right lung")
 
     Falls back to the raw caption if the requested attribute is not parseable.
     """
@@ -158,6 +165,15 @@ def build_variant(parsed: Dict, mode: str = "full") -> str:
     if mode == "keyword":
         parts = [p for p in (nature_s, quantity_s, loc_s) if p]
         return ", ".join(parts) if parts else parsed["raw"]
+
+    # ---- single-keyword modes ----
+    if mode == "kw_nature":
+        return nature_s if nature_s else parsed["raw"]
+    if mode == "kw_quantity":
+        qw = _QUANTITY_WORDS.get(parsed["quantity"]) if parsed["quantity_ok"] else None
+        return qw if qw else parsed["raw"]
+    if mode == "kw_location":
+        return parsed["location_text"] if parsed["location_ok"] else parsed["raw"]
 
     raise ValueError(f"Unknown mode: {mode!r}. Supported: {MODES}")
 

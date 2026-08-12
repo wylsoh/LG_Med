@@ -13,6 +13,8 @@ from pytorch_lightning.callbacks import ModelCheckpoint,EarlyStopping
 import torch.multiprocessing
 torch.multiprocessing.set_sharing_strategy('file_system')
 import argparse
+import os
+import csv
 
 
 def get_parser():
@@ -55,6 +57,19 @@ if __name__ == '__main__':
         ds_valid.caption_list = [process_caption(c, text_mode) for c in ds_valid.caption_list]
         print(f'[EXP] text_mode={text_mode}: train={len(ds_train.caption_list)} '
               f'valid={len(ds_valid.caption_list)}')
+
+        # ---- diagnostic: show & dump the actual text inputs fed to the model ----
+        os.makedirs('logs', exist_ok=True)
+        dump_path = f'logs/text_inputs_{text_mode}.csv'
+        with open(dump_path, 'w', newline='') as fh:
+            wr = csv.writer(fh)
+            wr.writerow(['image', 'text_input'])
+            for img, cap in zip(ds_train.image_list, ds_train.caption_list):
+                wr.writerow([img, cap])
+        print(f'[EXP] text inputs saved -> {dump_path}')
+        print('[EXP] example text inputs (train, first 8):')
+        for c in ds_train.caption_list[:8]:
+            print(f'    - "{c}"')
 
 
     dl_train = DataLoader(ds_train, batch_size=args.train_batch_size, shuffle=True, num_workers=args.train_batch_size)
