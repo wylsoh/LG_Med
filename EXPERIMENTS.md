@@ -73,15 +73,22 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 | E4 quantity | text-ablation | config/exp/quantity.yaml | 0.2846 (50) | 0.7964 | 0.6616 | 0.8308 | — | epoch70 早停 |
 | E5 keyword | text-ablation | config/exp/keyword.yaml | 0.2161 (39) | 0.8579 | 0.7512 | 0.8881 | — | epoch59 早停 |
 | E6 aux_full | aux-supervision | config/exp/aux_full.yaml | 0.2243 (40) | 0.8596 | 0.7538 | 0.8919 | — | epoch60 早停,关键词监督未提升 |
-| E7 aux_location | aux-supervision | config/exp/aux_location.yaml | 训练中… | | | | | |
+| E7 aux_location | aux-supervision | config/exp/aux_location.yaml | 0.2894 (34) | 0.8480 | 0.7360 | 0.8755 | — | epoch54 早停,关键词监督未提升 |
+| E8 kw_nature | text-ablation | config/exp/kw_nature.yaml | 训练中… | | | | | 仅性质词 bilateral/unilateral |
+| E9 kw_quantity | text-ablation | config/exp/kw_quantity.yaml | 训练中… | | | | | 仅数量词 two/one/four |
+| E10 kw_location | text-ablation | config/exp/kw_location.yaml | 训练中… | | | | | 仅方位短语 |
 
-> ⚠️ **关键发现(截至 E1-E5)**:
+> ⚠️ **关键发现(截至 E1-E7)**:
 > 1. **完整三句(full)在 val/test 上均优于任何单句**——与论文「stage3 单独最优」不一致。
 > 2. **方位(location)与结构化关键词(keyword)效果几乎相同**(test_dice 0.8897 / 0.8881),
 >    而性质(nature)与数量(quantity)明显更差(≈0.83)。
 >    → **分割性能主要由「方位」信息驱动**;nature/quantity 单独几乎无助于分割。
-> 3. 即:「更少文本反而更好」的现象在本数据集**未复现**;完整三句仍最优,但方位句与
->    极简关键词已接近其性能。待 E6/E7(aux)判断关键词监督是否带来额外收益。
+> 3. **关键词监督辅助损失无益**:E6(aux_full 0.8919) < E1(full 0.8947),
+>    E7(aux_location 0.8755) < E2(location 0.8897)。用正则关键词做辅助监督在
+>    当前框架下不仅没提升,反而略降。
+> 4. 即:「更少文本反而更好」的现象在本数据集**未复现**;完整三句仍最优。
+> 5. 单关键词实验(E8-E10)进行中:早期信号 kw_location(0.848) ≫ kw_nature(0.788) > kw_quantity(0.762),
+>    进一步印证「方位是关键信息」。
 > 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
 
 ---
