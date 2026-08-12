@@ -10,7 +10,7 @@ TRAIN:
   max_epochs: 100
   patience: 20
 
-  device: 0
+  device: 1
 
   model_save_path: ./save_model
   model_save_filename: medseg_location

@@ -22,17 +22,10 @@ def get_parser():
                         default='./config/training.yaml',
                         type=str,
                         help='config file')
-    parser.add_argument('--device',
-                        type=int,
-                        default=None,
-                        help='override GPU device index (for parallel runs)')
 
     args = parser.parse_args()
     assert args.config is not None
     cfg = config.load_cfg_from_cfg_file(args.config)
-
-    if args.device is not None:
-        cfg.device = args.device
 
     return cfg
 
