@@ -22,10 +22,17 @@ def get_parser():
                         default='./config/training.yaml',
                         type=str,
                         help='config file')
+    parser.add_argument('--device',
+                        type=int,
+                        default=None,
+                        help='override GPU device index (for parallel runs)')
 
     args = parser.parse_args()
     assert args.config is not None
     cfg = config.load_cfg_from_cfg_file(args.config)
+
+    if args.device is not None:
+        cfg.device = args.device
 
     return cfg
 
@@ -46,6 +53,15 @@ if __name__ == '__main__':
                     tokenizer=args.bert_type,
                     image_size=args.image_size,
                     mode='valid')
+
+    # ---- experiment: reduced text variants (no-op unless text_mode != 'full') ----
+    text_mode = getattr(args, 'text_mode', 'full')
+    if text_mode != 'full':
+        from utils.text_process import process_caption
+        ds_train.caption_list = [process_caption(c, text_mode) for c in ds_train.caption_list]
+        ds_valid.caption_list = [process_caption(c, text_mode) for c in ds_valid.caption_list]
+        print(f'[EXP] text_mode={text_mode}: train={len(ds_train.caption_list)} '
+              f'valid={len(ds_valid.caption_list)}')
 
 
     dl_train = DataLoader(ds_train, batch_size=args.train_batch_size, shuffle=True, num_workers=args.train_batch_size)
