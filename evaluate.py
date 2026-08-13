@@ -39,7 +39,8 @@ if __name__ == '__main__':
     model.load_state_dict(checkpoint, strict=True)
 
     # dataloader
-    return_attrs = getattr(args, 'use_aux', False)
+    return_attrs = (getattr(args, 'use_aux', False)
+                    or getattr(args, 'count_loss_weight', 0) > 0)
     ds_test = QaTa(csv_path=args.test_csv_path,
                     root_path=args.test_root_path,
                     tokenizer=args.bert_type,

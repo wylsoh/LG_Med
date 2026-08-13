@@ -1,4 +1,5 @@
 from utils.model import LanGuideMedSeg
+from utils.count_loss import soft_euler_count, count_components
 from monai.losses import DiceCELoss
 from torchmetrics import Accuracy,Dice
 from torchmetrics.classification import BinaryJaccardIndex
@@ -19,6 +20,7 @@ class LanGuideMedSegWrapper(pl.LightningModule):
 
         self.use_aux = getattr(args, 'use_aux', False)
         self.aux_weight = getattr(args, 'aux_weight', 1.0)
+        self.count_loss_weight = getattr(args, 'count_loss_weight', 0.0)
         
         self.model = LanGuideMedSeg(args.bert_type, args.vision_type, args.project_dim,
                                     use_aux=self.use_aux)
@@ -60,7 +62,55 @@ class LanGuideMedSegWrapper(pl.LightningModule):
         else:
             preds = out
             loss = self.loss_fn(preds, y)
-        return {'loss': loss, 'preds': preds.detach(), 'y': y.detach()}
+
+        # ---- connected-component count supervision (quantity keyword) ----
+        ret = {'loss': loss, 'preds': preds.detach(), 'y': y.detach()}
+        if self.count_loss_weight > 0:
+            count_loss = self._count_loss(preds, x[1]['attrs'])
+            self.log('count_loss', count_loss, prog_bar=True, batch_size=y.size(0))
+            ret['loss'] = loss + self.count_loss_weight * count_loss
+            if not self.training:
+                self._collect_count_stats(preds, x[1]['attrs'], ret)
+        return ret
+
+    def _count_loss(self, preds, attrs):
+        """Bounded differentiable count loss: Euler proxy vs quantity.
+
+        `soft_euler_count` can be large for soft probability maps (e.g. an
+        almost-uniform map has a large Euler number). The loss is therefore
+        bounded via z/(z+1): it stays ~1 (inert, weak gradient) while the map
+        is far from binary, and becomes active once the segmentation is
+        near-binary and the count mismatch is small.
+        """
+        device = preds.device
+        counts = soft_euler_count(preds)  # (B,) differentiable proxy
+        target = attrs['quantity'].to(device).float() + 1.0  # 1..4
+        m = attrs['quantity_ok'].to(device)
+        if not m.any():
+            return torch.zeros((), device=device)
+        diff = torch.abs(counts - target)
+        loss = diff / (diff + 1.0)  # bounded in [0, 1)
+        return (loss * m).sum() / m.sum()
+
+    def _collect_count_stats(self, preds, attrs, ret):
+        """Exact connected-component count metrics (no grad, on GPU)."""
+        with torch.no_grad():
+            mask = preds.detach() > 0.5             # (B,1,H,W) bool
+            counts = count_components(mask[:, 0])   # (B,) exact
+        q = attrs['quantity'].detach() + 1          # 1..4
+        ok = attrs['quantity_ok'].detach()
+        correct = total = 0
+        mae = 0.0
+        for b in range(preds.shape[0]):
+            if ok[b].item():
+                c = int(counts[b].item())
+                t = int(q[b].item())
+                total += 1
+                correct += int(c == t)
+                mae += abs(c - t)
+        ret['count_correct'] = correct
+        ret['count_total'] = total
+        ret['count_mae'] = mae
 
     def _aux_loss(self, logits, attrs):
         """Combined auxiliary attribute loss (masked BCE / CE with ignore)."""
@@ -119,14 +169,26 @@ class LanGuideMedSegWrapper(pl.LightningModule):
                 self.log(name,step_metric,prog_bar=True)
         return outputs["loss"].mean()
         
+    def _pass_count_stats(self, outputs, ret):
+        if self.count_loss_weight > 0:
+            for k in ('count_correct', 'count_total', 'count_mae'):
+                if k in outputs:
+                    ret[k] = outputs[k]
+
     def training_step_end(self, outputs):
-        return {'loss':self.shared_step_end(outputs,"train")}
-            
+        ret = {'loss': self.shared_step_end(outputs, "train")}
+        self._pass_count_stats(outputs, ret)
+        return ret
+
     def validation_step_end(self, outputs):
-        return {'val_loss':self.shared_step_end(outputs,"val")}
-            
+        ret = {'val_loss': self.shared_step_end(outputs, "val")}
+        self._pass_count_stats(outputs, ret)
+        return ret
+
     def test_step_end(self, outputs):
-        return {'test_loss':self.shared_step_end(outputs,"test")}
+        ret = {'test_loss': self.shared_step_end(outputs, "test")}
+        self._pass_count_stats(outputs, ret)
+        return ret
             
     def shared_epoch_end(self,outputs,stage="train"):
         metrics = self.train_metrics if stage=="train" else (
@@ -140,6 +202,16 @@ class LanGuideMedSegWrapper(pl.LightningModule):
             epoch_metric = metrics[name].compute().item() 
             metrics[name].reset()
             dic[stage+"_"+name] = epoch_metric 
+
+        # aggregate exact connected-component count metrics (count_loss exp.)
+        if self.count_loss_weight > 0:
+            c_c = sum(t.get('count_correct', 0) for t in outputs)
+            c_t = sum(t.get('count_total', 0) for t in outputs)
+            c_m = sum(t.get('count_mae', 0.0) for t in outputs)
+            if c_t > 0:
+                dic[stage + '_count_acc'] = c_c / c_t
+                dic[stage + '_count_mae'] = c_m / c_t
+
         if stage!='test':
             self.history[epoch] = dict(self.history.get(epoch,{}),**dic)    
         return dic 

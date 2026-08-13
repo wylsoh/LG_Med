@@ -35,7 +35,8 @@ if __name__ == '__main__':
     args = get_parser()
     print("cuda:",torch.cuda.is_available())
 
-    return_attrs = getattr(args, 'use_aux', False)
+    return_attrs = (getattr(args, 'use_aux', False)
+                    or getattr(args, 'count_loss_weight', 0) > 0)
 
     ds_train = QaTa(csv_path=args.train_csv_path,
                     root_path=args.train_root_path,
