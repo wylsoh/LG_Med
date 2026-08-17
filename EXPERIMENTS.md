@@ -77,6 +77,8 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 | E10 kw_location | text-ablation | config/exp/kw_location.yaml | 0.2408 (44) | 0.8550 | 0.7468 | 0.8842 | — | 仅方位短语 |
 | E6 aux_full | aux-supervision | config/exp/aux_full.yaml | 0.2243 (40) | 0.8596 | 0.7538 | 0.8919 | — | aux 监督未提升 |
 | E7 aux_location | aux-supervision | config/exp/aux_location.yaml | 0.2894 (34) | 0.8480 | 0.7360 | 0.8792 | 0.7844 | aux 监督未提升(真实 test,已评估) |
+| C1 count_full | aux-supervision | config/exp/count_full.yaml | ~1.37 (16) | 0.301 | 0.177 | 0.3641 | 0.2226 | 计数监督致分割崩溃;test count_acc=0.386 |
+| C2 count_location | aux-supervision | config/exp/count_location.yaml | ~0.89 (34) | 0.192 | 0.106 | 0.2441 | 0.1390 | 同上;test count_acc=0.755 虚高 |
 
 > ⚠️ **关键发现(全部实验)**:
 > 1. **完整三句(full)在 val/test 上均优于任何单句**——与论文「stage3 单独最优」不一致。
@@ -87,6 +89,8 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 >    ——更精简的单关键词反而略优,提示句子中的冗余/噪声有轻微负作用;但方位句(0.8897)> 方位关键词(0.8842)。
 > 4. **关键词监督辅助损失无益**:E6(0.8919)< E1(0.8947)、E7(0.8792)< E2(0.8897)。
 > 5. 即:「更少文本反而更好」的现象在本数据集**未复现**;完整三句仍最优。
+> 6. **连通域计数监督(C1/C2)是失败的**:`count_loss_weight=1.0` 加入后,模型学会**投机输出单一连通域**(q=1 单区域占 75%),count_acc 虚高(~0.685 命中单区域样本)但 dice 从 0.85+ 崩至 0.24~0.36。
+>    原因:数量标签严重不平衡(q=1 占 75%),计数损失被多数类主导,压过 DiceCE,导致模型牺牲分割质量换取计数"正确"。
 > 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
 > 待 E4/E5/E6/E7 完成以补全曲线。
 
