@@ -76,7 +76,7 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 | E9 kw_quantity | text-ablation | config/exp/kw_quantity.yaml | 0.2919 (57) | 0.7951 | 0.6600 | 0.8340 | — | 仅数量词 |
 | E10 kw_location | text-ablation | config/exp/kw_location.yaml | 0.2408 (44) | 0.8550 | 0.7468 | 0.8842 | — | 仅方位短语 |
 | E6 aux_full | aux-supervision | config/exp/aux_full.yaml | 0.2243 (40) | 0.8596 | 0.7538 | 0.8919 | — | aux 监督未提升 |
-| E7 aux_location | aux-supervision | config/exp/aux_location.yaml | 0.2894 (34) | 0.8480 | 0.7360 | 0.8755 | — | aux 监督未提升 |
+| E7 aux_location | aux-supervision | config/exp/aux_location.yaml | 0.2894 (34) | 0.8480 | 0.7360 | 0.8792 | 0.7844 | aux 监督未提升(真实 test,已评估) |
 
 > ⚠️ **关键发现(全部实验)**:
 > 1. **完整三句(full)在 val/test 上均优于任何单句**——与论文「stage3 单独最优」不一致。
@@ -85,7 +85,7 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 >    - 而性质/数量关键词 E8/E9(≈0.833)与对应句子 E3/E4(≈0.83)均明显更差。
 > 3. **单关键词 vs 对应句子**:kw_nature(0.8328)> nature 句(0.8273)、kw_quantity(0.8340)> quantity 句(0.8308)
 >    ——更精简的单关键词反而略优,提示句子中的冗余/噪声有轻微负作用;但方位句(0.8897)> 方位关键词(0.8842)。
-> 4. **关键词监督辅助损失无益**:E6(0.8919)< E1(0.8947)、E7(0.8755)< E2(0.8897)。
+> 4. **关键词监督辅助损失无益**:E6(0.8919)< E1(0.8947)、E7(0.8792)< E2(0.8897)。
 > 5. 即:「更少文本反而更好」的现象在本数据集**未复现**;完整三句仍最优。
 > 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
 > 待 E4/E5/E6/E7 完成以补全曲线。
