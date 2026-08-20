@@ -21,6 +21,12 @@ class LanGuideMedSegWrapper(pl.LightningModule):
         self.use_aux = getattr(args, 'use_aux', False)
         self.aux_weight = getattr(args, 'aux_weight', 1.0)
         self.count_loss_weight = getattr(args, 'count_loss_weight', 0.0)
+        self.count_weighted = getattr(args, 'count_weighted', False)
+        self.count_min_q = getattr(args, 'count_min_q', 1)
+        if self.count_weighted:
+            # 逆频率权重(固定自训练集数量分布): one/two/three/four
+            freq = torch.tensor([1442., 5268., 365., 59.])
+            self.register_buffer('_count_w', (freq.sum() / (4 * freq)).float())
         
         self.model = LanGuideMedSeg(args.bert_type, args.vision_type, args.project_dim,
                                     use_aux=self.use_aux)
@@ -28,8 +34,15 @@ class LanGuideMedSegWrapper(pl.LightningModule):
         self.history = {}
         
         self.loss_fn = DiceCELoss()
+        self.aux_quantity_only = getattr(args, 'aux_quantity_only', False)
         if self.use_aux:
-            self.aux_ce = nn.CrossEntropyLoss(ignore_index=-100)
+            if self.aux_quantity_only:
+                # 只监督 quantity 分类头, CE 用逆频率类权重(one/two/three/four)
+                freq = torch.tensor([1442., 5268., 365., 59.])
+                self.aux_ce = nn.CrossEntropyLoss(
+                    weight=(freq.sum() / (4 * freq)).float(), ignore_index=-100)
+            else:
+                self.aux_ce = nn.CrossEntropyLoss(ignore_index=-100)
 
         metrics_dict = {"acc":Accuracy(task='binary'),"dice":Dice(),"MIoU":BinaryJaccardIndex()}
         self.train_metrics = nn.ModuleDict(metrics_dict)
@@ -81,6 +94,13 @@ class LanGuideMedSegWrapper(pl.LightningModule):
         bounded via z/(z+1): it stays ~1 (inert, weak gradient) while the map
         is far from binary, and becomes active once the segmentation is
         near-binary and the count mismatch is small.
+
+        If `count_weighted=True`:
+          - only samples with quantity >= count_min_q are supervised
+            (one-area samples are handled by DiceCE; avoids majority-class
+            cheating by always emitting 2 components);
+          - each sample's loss is scaled by the inverse class frequency so
+            the minority classes (three/four) are not dominated by `two`.
         """
         device = preds.device
         counts = soft_euler_count(preds)  # (B,) differentiable proxy
@@ -90,6 +110,13 @@ class LanGuideMedSegWrapper(pl.LightningModule):
             return torch.zeros((), device=device)
         diff = torch.abs(counts - target)
         loss = diff / (diff + 1.0)  # bounded in [0, 1)
+        if self.count_weighted:
+            q = attrs['quantity'].to(device).long()
+            m = m & (q >= self.count_min_q)
+            if not m.any():
+                return torch.zeros((), device=device)
+            wgt = self._count_w[q.clamp(0, 3)] * m
+            return (loss * wgt).sum() / wgt.sum()
         return (loss * m).sum() / m.sum()
 
     def _collect_count_stats(self, preds, attrs, ret):
@@ -116,6 +143,15 @@ class LanGuideMedSegWrapper(pl.LightningModule):
         """Combined auxiliary attribute loss (masked BCE / CE with ignore)."""
         device = logits['nature'].device
         losses = []
+
+        # quantity-only mode: single weighted 4-class CE on the quantity head
+        if self.aux_quantity_only:
+            m = attrs['quantity_ok'].to(device)
+            if not m.any():
+                return torch.zeros((), device=device)
+            t = attrs['quantity'].to(device).long()
+            t = torch.where(m, t, torch.full_like(t, -100))
+            return self.aux_ce(logits['quantity'], t)
 
         # nature: 2-class, per-sample masked BCE
         m = attrs['nature_ok'].to(device)
