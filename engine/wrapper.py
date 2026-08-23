@@ -35,6 +35,7 @@ class LanGuideMedSegWrapper(pl.LightningModule):
         
         self.loss_fn = DiceCELoss()
         self.aux_quantity_only = getattr(args, 'aux_quantity_only', False)
+        self.aux_nature_only = getattr(args, 'aux_nature_only', False)
         if self.use_aux:
             if self.aux_quantity_only:
                 # 只监督 quantity 分类头, CE 用逆频率类权重(one/two/three/four)
@@ -152,6 +153,19 @@ class LanGuideMedSegWrapper(pl.LightningModule):
             t = attrs['quantity'].to(device).long()
             t = torch.where(m, t, torch.full_like(t, -100))
             return self.aux_ce(logits['quantity'], t)
+
+        # nature-only mode: single weighted 2-class CE on the nature head
+        # (inverse-frequency: unilateral=1482, bilateral=5663 in train)
+        if self.aux_nature_only:
+            m = attrs['nature_ok'].to(device)
+            if not m.any():
+                return torch.zeros((), device=device)
+            freq = torch.tensor([1482., 5663.])   # 0=unilateral, 1=bilateral
+            w = (freq.sum() / (2 * freq)).to(device)
+            t = attrs['nature'].to(device).long()
+            loss = nn.functional.cross_entropy(
+                logits['nature'], t, weight=w, reduction='none')
+            return (loss * m).sum() / m.sum()
 
         # nature: 2-class, per-sample masked BCE
         m = attrs['nature_ok'].to(device)
