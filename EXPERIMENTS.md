@@ -89,6 +89,10 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 | E15 clip_clean | aux-supervision | config/exp/clip_clean_full.yaml | ~0.36 (0) | 0.746 | 0.595 | 0.8922 | 0.8054 | 去碎片对齐:修复CLIP碎片化,count_acc=**88.0%** |
 | E16 film_full | aux-supervision | config/exp/film_full.yaml | ~0.30 (—) | 0.857 | 0.751 | 0.8913 | 0.8039 | **FiLM调制:count_acc=90.0%**(提升) |
 | E17 tanda_full | aux-supervision | config/exp/tanda_full.yaml | ~0.31 (—) | 0.857 | 0.750 | 0.8874 | 0.7976 | TANDA文本增强:无提升,count_acc=86.8% |
+| E18 aux_quantity_location | aux-supervision | config/exp/aux_quantity_location.yaml | ~0.31 (—) | 0.841 | 0.729 | 0.8613 | 0.7564 | 数量头+方位句:坏组合,count_acc=**25%**(文本缺数量词) |
+| E19 aux_quantity_w10 | aux-supervision | config/exp/aux_quantity_w10.yaml | ~0.30 (—) | 0.857 | 0.750 | 0.8874 | 0.7976 | 数量头 weight1.0:count_acc=88.7% |
+| E20 aux_quantity_unfreeze | aux-supervision | config/exp/aux_quantity_unfreeze.yaml | ~0.30 (—) | 0.856 | 0.749 | 0.8869 | 0.7968 | 数量头+解冻:count_acc=88.1% |
+| E21 aux_quantity_multitext | aux-supervision | config/exp/aux_quantity_multitext.yaml | ~0.31 (—) | 0.859 | 0.753 | 0.8888 | 0.7999 | 数量头+多层文本:count_acc=**90.1%** ≈ C4 |
 
 > ⚠️ **关键发现(全部实验)**:
 > 1. **完整三句(full)在 val/test 上均优于任何单句**——与论文「stage3 单独最优」不一致。
@@ -116,7 +120,11 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 >    → 证明原 CLIP 失败根源确为碎片化;但修复后全局对齐对区域计数的增益有限(88.0% vs 87.3%),仍不及数量分类头 C4(91.2%)——**区域计数仍需要数量语义的显式引导**。
 > 13. **FiLM 文本条件调制(E16)是继数量分类头后第二个提升区域计数的方法**:count_acc **90.0%**(>基线 87.3%,≈C4 91.2%),true3 48% / true4 38%(基线 40%/25%),test_dice 0.8913 接近基线。
 >    → 显式的文本条件调制(scale/shift)比隐式交叉注意力更利于区域结构;是除数量头外最有潜力的方向。
-> 14. **TANDA 文本增强(E17)无提升**:count_acc 86.8%(≈基线),dice 0.8874 略低 → 结构化等价变体增强不能带来增益。> 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
+> 14. **TANDA 文本增强(E17)无提升**:count_acc 86.8%(≈基线),dice 0.8874 略低 → 结构化等价变体增强不能带来增益。
+> 15. **数量头组合实验(E18-E21)**:
+>    - E18 数量头+方位句:count_acc 仅 **25%** → **数量头必须从文本读到数量词**(location 文本缺失数量信息,坏组合);
+>    - E19/E20(weight1.0/解冻):88.7%/88.1%,略低于 C4(0.3 权重,91.2%);
+>    - **E21 数量头+多层文本:90.1% ≈ C4(91.2%)** → 多层文本融合与数量头兼容良好。> 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
 > 待 E4/E5/E6/E7 完成以补全曲线。
 
 ---
