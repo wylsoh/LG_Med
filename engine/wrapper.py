@@ -22,6 +22,13 @@ class LanGuideMedSegWrapper(pl.LightningModule):
         self.aux_weight = getattr(args, 'aux_weight', 1.0)
         self.count_loss_weight = getattr(args, 'count_loss_weight', 0.0)
         self.clip_weight = getattr(args, 'clip_weight', 0.0)
+        self.clip_clean = getattr(args, 'clip_clean', False)
+        if self.clip_clean:
+            # 对齐前先对分割图做形态学去碎片, 再用投影头提取对齐特征
+            self.seg_align = nn.Sequential(
+                nn.Conv2d(1, 32, 3, padding=1), nn.GELU(),
+                nn.AdaptiveAvgPool2d(1), nn.Flatten(),
+                nn.Linear(32, args.project_dim))
         self.count_weighted = getattr(args, 'count_weighted', False)
         self.count_min_q = getattr(args, 'count_min_q', 1)
         if self.count_weighted:
@@ -99,8 +106,11 @@ class LanGuideMedSegWrapper(pl.LightningModule):
         # ---- CLIP-style image-text alignment (training only) ----
         if self.clip_weight > 0 and self.training:
             if hasattr(self.model, 'last_img_proj'):
-                clip_loss = self._clip_loss(self.model.last_img_proj,
-                                            self.model.last_txt_proj)
+                if self.clip_clean:
+                    clip_loss = self._clip_clean_loss(preds, self.model.last_txt_proj)
+                else:
+                    clip_loss = self._clip_loss(self.model.last_img_proj,
+                                                self.model.last_txt_proj)
                 self.log('clip_loss', clip_loss, prog_bar=True, batch_size=y.size(0))
                 ret['loss'] = ret['loss'] + self.clip_weight * clip_loss
         if self.count_loss_weight > 0:
@@ -126,6 +136,23 @@ class LanGuideMedSegWrapper(pl.LightningModule):
         labels = torch.arange(logits.shape[0], device=logits.device)
         return 0.5 * (nn.functional.cross_entropy(logits, labels)
                       + nn.functional.cross_entropy(logits.t(), labels))
+
+    def _clip_clean_loss(self, preds, txt, temperature=0.07, kernel=5):
+        """CLIP alignment on speckle-removed segmentation (clip_clean).
+
+        Applies a differentiable morphological opening (erode = min-pool then
+        dilate = max-pool) to the soft segmentation to drop small fragments
+        BEFORE pooling + projecting for the global alignment - mirrors the
+        min_area filtering used in evaluation, so the model cannot align to
+        (or be rewarded for) tiny speckle regions.
+        """
+        x = preds                                   # (B,1,H,W) sigmoid
+        x_erode = -nn.functional.max_pool2d(-x, kernel_size=kernel,
+                                            stride=1, padding=kernel // 2)
+        x_open = nn.functional.max_pool2d(x_erode, kernel_size=kernel,
+                                          stride=1, padding=kernel // 2)
+        img = self.seg_align(x_open)                # (B, project_dim)
+        return self._clip_loss(img, txt, temperature)
 
     def _count_loss(self, preds, attrs):
         """Bounded differentiable count loss: Euler proxy vs quantity.
