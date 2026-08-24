@@ -84,6 +84,8 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 | C4 aux_quantity_weighted | aux-supervision | config/exp/aux_quantity_weighted.yaml | ~0.18 (34) | — | — | **0.8904** | **0.8025** | 数量分类头监督成功:test_count_acc(面积过滤后)=**91.2%** |
 | E11 aux_nature | aux-supervision | config/exp/aux_nature.yaml | ~0.22 (—) | 0.859 | 0.754 | 0.8896 | 0.8011 | 性质分类头监督:dice 持平但 count_acc(面积过滤后)=**81.7%**,低于基线 |
 | E12 clip_full | aux-supervision | config/exp/clip_full.yaml | ~0.48 (34) | 0.856 | 0.749 | 0.8825 | 0.7897 | CLIP 对比对齐损失:未提升,面积过滤 count_acc=**49%**,区域拓扑受损 |
+| E13 unfreeze_full | aux-supervision | config/exp/unfreeze_full.yaml | ~0.31 (43) | 0.860 | 0.752 | 0.8914 | 0.8040 | 解冻 BERT 末2层:略低于基线,count_acc=85.8% |
+| E14 multitext_full | aux-supervision | config/exp/multitext_full.yaml | ~0.32 (33) | 0.861 | 0.753 | 0.8907 | 0.8029 | 多层文本特征:略低于基线,count_acc=87.1% |
 
 > ⚠️ **关键发现(全部实验)**:
 > 1. **完整三句(full)在 val/test 上均优于任何单句**——与论文「stage3 单独最优」不一致。
@@ -106,6 +108,8 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 >    - 二者 test_dice 均 ≈0.89(与基线持平)→ 证明:辅助头机制本身不带来收益,真正起作用的是**数量语义**对区域拓扑的引导;冗余的性质信号甚至轻微干扰区域计数。
 > 10. **CLIP 式图文对比对齐(E12)是负结果**:test_dice 0.8825(<基线 0.8947),面积过滤后 count_acc 仅 **49%**(<基线 87.3%)。
 >    全局池化图像特征与文本嵌入的 InfoNCE 对齐虽不损害像素级 dice,但**破坏分割图的区域拓扑**(碎片化),区域数量准确性大幅下降 → 简单的全局对齐损失不适配本任务。
+> 11. **unfreeze / multitext(文本利用增强)也无提升**:解冻 BERT 末 2 层(test_dice 0.8914,count_acc 85.8%)、多层文本特征融合(0.8907,87.1%)均略低于基线(0.8947 / 87.3%)。
+>     → 在交叉注意力框架下,增强文本编码/表示都无法超越基线;**唯一能提升区域计数准确性的是数量分类头监督(C4,91.2%)**。
 > 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
 > 待 E4/E5/E6/E7 完成以补全曲线。
 
