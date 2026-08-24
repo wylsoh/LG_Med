@@ -96,8 +96,8 @@ class LanGuideMedSegWrapper(pl.LightningModule):
 
         # ---- connected-component count supervision (quantity keyword) ----
         ret = {'loss': loss, 'preds': preds.detach(), 'y': y.detach()}
-        # ---- CLIP-style image-text alignment (optional) ----
-        if self.clip_weight > 0:
+        # ---- CLIP-style image-text alignment (training only) ----
+        if self.clip_weight > 0 and self.training:
             if hasattr(self.model, 'last_img_proj'):
                 clip_loss = self._clip_loss(self.model.last_img_proj,
                                             self.model.last_txt_proj)
@@ -116,8 +116,10 @@ class LanGuideMedSegWrapper(pl.LightningModule):
 
         img/txt: (B, project_dim) pooled global features. Pulls the image
         representation of each sample close to its own caption embedding and
-        away from other captions in the batch.
+        away from other captions in the batch. Needs B >= 2 (returns 0 else).
         """
+        if img.shape[0] < 2:
+            return torch.zeros((), device=img.device)
         img = nn.functional.normalize(img, dim=-1)
         txt = nn.functional.normalize(txt, dim=-1)
         logits = img @ txt.t() / temperature          # (B, B)
