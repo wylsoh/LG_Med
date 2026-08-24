@@ -12,7 +12,7 @@ from .aux_head import AuxHeads
 
 class BERTModel(nn.Module):
 
-    def __init__(self, bert_type, project_dim):
+    def __init__(self, bert_type, project_dim, unfreeze_layers=0):
 
         super(BERTModel, self).__init__()
 
@@ -23,9 +23,16 @@ class BERTModel(nn.Module):
             nn.GELU(),             
             nn.Linear(project_dim, project_dim)
         )
-        # freeze the parameters
+        # freeze the parameters (except optionally the last encoder layers)
         for param in self.model.parameters():
             param.requires_grad = False
+        self.unfrozen = []
+        if unfreeze_layers > 0:
+            bert = self.model.bert if hasattr(self.model, 'bert') else self.model
+            for layer in bert.encoder.layer[-unfreeze_layers:]:
+                for p in layer.parameters():
+                    p.requires_grad = True
+                    self.unfrozen.append(p)
 
     def forward(self, input_ids, attention_mask):
 
@@ -57,14 +64,17 @@ class VisionModel(nn.Module):
 
 class LanGuideMedSeg(nn.Module):
 
-    def __init__(self, bert_type, vision_type, project_dim=512, use_aux=False):
+    def __init__(self, bert_type, vision_type, project_dim=512, use_aux=False,
+                 text_unfreeze_layers=0, multi_text=False):
 
         super(LanGuideMedSeg, self).__init__()
 
         self.use_aux = use_aux
+        self.multi_text = multi_text
 
         self.encoder = VisionModel(vision_type, project_dim)
-        self.text_encoder = BERTModel(bert_type, project_dim)
+        self.text_encoder = BERTModel(bert_type, project_dim,
+                                      unfreeze_layers=text_unfreeze_layers)
 
         self.spatial_dim = [7,14,28,56]    # 224*224
         feature_dim = [768,384,192,96]
@@ -95,9 +105,14 @@ class LanGuideMedSeg(nn.Module):
             image_features = [rearrange(item,'b c h w -> b (h w) c') for item in image_features] 
 
         os32 = image_features[3]
-        os16 = self.decoder16(os32,image_features[2], text_embeds[-1])
-        os8 = self.decoder8(os16,image_features[1], text_embeds[-1])
-        os4 = self.decoder4(os8,image_features[0], text_embeds[-1])
+        if self.multi_text:
+            # fuse multiple text hidden layers (layers 1,2,last) instead of only last
+            text_guide = sum(text_embeds[i] for i in (1, 2, -1)) / 3.0
+        else:
+            text_guide = text_embeds[-1]
+        os16 = self.decoder16(os32,image_features[2], text_guide)
+        os8 = self.decoder8(os16,image_features[1], text_guide)
+        os4 = self.decoder4(os8,image_features[0], text_guide)
         os4 = rearrange(os4, 'B (H W) C -> B C H W',H=self.spatial_dim[-1],W=self.spatial_dim[-1])
 
         aux_logits = None

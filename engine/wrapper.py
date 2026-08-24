@@ -29,8 +29,12 @@ class LanGuideMedSegWrapper(pl.LightningModule):
             freq = torch.tensor([1442., 5268., 365., 59.])
             self.register_buffer('_count_w', (freq.sum() / (4 * freq)).float())
         
-        self.model = LanGuideMedSeg(args.bert_type, args.vision_type, args.project_dim,
-                                    use_aux=self.use_aux)
+        self.model = LanGuideMedSeg(
+            args.bert_type, args.vision_type, args.project_dim,
+            use_aux=self.use_aux,
+            text_unfreeze_layers=getattr(args, 'text_unfreeze_layers', 0),
+            multi_text=getattr(args, 'multi_text', False))
+        self._unfrozen_ids = {id(p) for p in self.model.text_encoder.unfrozen}
         self.lr = args.lr
         self.history = {}
         
@@ -55,10 +59,22 @@ class LanGuideMedSegWrapper(pl.LightningModule):
 
     def configure_optimizers(self):
 
-        optimizer = torch.optim.AdamW(self.model.parameters(),lr = self.lr) # 修改这里的参数
-        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max =200, eta_min=1e-6)
+        if self._unfrozen_ids:
+            # unfrozen BERT layers get a 10x smaller learning rate
+            base, small = [], []
+            for name, p in self.model.named_parameters():
+                if not p.requires_grad:
+                    continue
+                (small if id(p) in self._unfrozen_ids else base).append(p)
+            optimizer = torch.optim.AdamW(
+                [{'params': base, 'lr': self.lr},
+                 {'params': small, 'lr': self.lr / 10.0}],
+                lr=self.lr)
+        else:
+            optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr)
+        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200, eta_min=1e-6)
 
-        return {"optimizer":optimizer,"lr_scheduler":lr_scheduler}
+        return {"optimizer": optimizer, "lr_scheduler": lr_scheduler}
         
     def forward(self,x):
        
