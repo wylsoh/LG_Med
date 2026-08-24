@@ -21,6 +21,7 @@ class LanGuideMedSegWrapper(pl.LightningModule):
         self.use_aux = getattr(args, 'use_aux', False)
         self.aux_weight = getattr(args, 'aux_weight', 1.0)
         self.count_loss_weight = getattr(args, 'count_loss_weight', 0.0)
+        self.clip_weight = getattr(args, 'clip_weight', 0.0)
         self.count_weighted = getattr(args, 'count_weighted', False)
         self.count_min_q = getattr(args, 'count_min_q', 1)
         if self.count_weighted:
@@ -79,6 +80,13 @@ class LanGuideMedSegWrapper(pl.LightningModule):
 
         # ---- connected-component count supervision (quantity keyword) ----
         ret = {'loss': loss, 'preds': preds.detach(), 'y': y.detach()}
+        # ---- CLIP-style image-text alignment (optional) ----
+        if self.clip_weight > 0:
+            if hasattr(self.model, 'last_img_proj'):
+                clip_loss = self._clip_loss(self.model.last_img_proj,
+                                            self.model.last_txt_proj)
+                self.log('clip_loss', clip_loss, prog_bar=True, batch_size=y.size(0))
+                ret['loss'] = ret['loss'] + self.clip_weight * clip_loss
         if self.count_loss_weight > 0:
             count_loss = self._count_loss(preds, x[1]['attrs'])
             self.log('count_loss', count_loss, prog_bar=True, batch_size=y.size(0))
@@ -86,6 +94,20 @@ class LanGuideMedSegWrapper(pl.LightningModule):
             if not self.training:
                 self._collect_count_stats(preds, x[1]['attrs'], ret)
         return ret
+
+    def _clip_loss(self, img, txt, temperature=0.07):
+        """Symmetric InfoNCE (CLIP-style) aligning image & text projections.
+
+        img/txt: (B, project_dim) pooled global features. Pulls the image
+        representation of each sample close to its own caption embedding and
+        away from other captions in the batch.
+        """
+        img = nn.functional.normalize(img, dim=-1)
+        txt = nn.functional.normalize(txt, dim=-1)
+        logits = img @ txt.t() / temperature          # (B, B)
+        labels = torch.arange(logits.shape[0], device=logits.device)
+        return 0.5 * (nn.functional.cross_entropy(logits, labels)
+                      + nn.functional.cross_entropy(logits.t(), labels))
 
     def _count_loss(self, preds, attrs):
         """Bounded differentiable count loss: Euler proxy vs quantity.

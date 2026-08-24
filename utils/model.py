@@ -109,6 +109,10 @@ class LanGuideMedSeg(nn.Module):
 
         out = self.out(os1).sigmoid()
 
+        # stash pooled image/text projections for optional CLIP-style alignment
+        self.last_img_proj = image_project
+        self.last_txt_proj = text_project
+
         if self.use_aux:
             return out, aux_logits
         return out
