@@ -40,7 +40,8 @@ class LanGuideMedSegWrapper(pl.LightningModule):
             args.bert_type, args.vision_type, args.project_dim,
             use_aux=self.use_aux,
             text_unfreeze_layers=getattr(args, 'text_unfreeze_layers', 0),
-            multi_text=getattr(args, 'multi_text', False))
+            multi_text=getattr(args, 'multi_text', False),
+            film=getattr(args, 'film', False))
         self._unfrozen_ids = {id(p) for p in self.model.text_encoder.unfrozen}
         self.lr = args.lr
         self.history = {}

@@ -1,0 +1,40 @@
+TRAIN:
+  train_batch_size: 16
+  lr: 0.0003
+
+  valid_batch_size: 8
+
+  image_size: [224,224]
+
+  min_epochs: 20
+  max_epochs: 100
+  patience: 20
+
+  device: 1
+
+  model_save_path: ./save_model
+  model_save_filename: medseg_tanda_full
+
+MODEL:
+  bert_type: ./lib/BiomedVLP-CXR-BERT-specialized
+  vision_type: ./lib/convnext-tiny-224
+  project_dim: 768
+
+TEXT:
+  text_mode: full
+
+AUX:
+  use_aux: false
+  aux_weight: 1.0
+  count_loss_weight: 0.0
+  clip_weight: 0.0
+
+DATA:
+  train_csv_path: ./data/QaTa-COV19-v2/prompt/train.csv
+  train_root_path: ./data/QaTa-COV19-v2/Train
+
+  test_csv_path: ./data/QaTa-COV19-v2/prompt/test.csv
+  test_root_path: ./data/QaTa-COV19-v2/Test
+
+TANDA:
+  tanda: true

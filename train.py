@@ -43,7 +43,8 @@ if __name__ == '__main__':
                     tokenizer=args.bert_type,
                     image_size=args.image_size,
                     mode='train',
-                    return_attrs=return_attrs)
+                    return_attrs=return_attrs,
+                    tanda=getattr(args, 'tanda', False))
 
     ds_valid = QaTa(csv_path=args.train_csv_path,
                     root_path=args.train_root_path,

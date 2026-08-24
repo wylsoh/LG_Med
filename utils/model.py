@@ -65,12 +65,13 @@ class VisionModel(nn.Module):
 class LanGuideMedSeg(nn.Module):
 
     def __init__(self, bert_type, vision_type, project_dim=512, use_aux=False,
-                 text_unfreeze_layers=0, multi_text=False):
+                 text_unfreeze_layers=0, multi_text=False, film=False):
 
         super(LanGuideMedSeg, self).__init__()
 
         self.use_aux = use_aux
         self.multi_text = multi_text
+        self.film = film
 
         self.encoder = VisionModel(vision_type, project_dim)
         self.text_encoder = BERTModel(bert_type, project_dim,
@@ -85,9 +86,21 @@ class LanGuideMedSeg(nn.Module):
         self.decoder1 = SubpixelUpsample(2,feature_dim[3],24,4)
         self.out = UnetOutBlock(2, in_channels=24, out_channels=1)
 
+        if self.film:
+            # FiLM: text-conditional per-channel scale/shift on each decoder stage
+            self.film_mlp = nn.ModuleList([
+                nn.Linear(project_dim, 2 * d)
+                for d in (feature_dim[1], feature_dim[2], feature_dim[3])])
+
         if use_aux:
             # aux heads take the pooled decoder feature (feature_dim[-1] = 96)
             self.aux_head = AuxHeads(in_dim=feature_dim[3], hidden=128)
+
+    def _film(self, x, proj, idx):
+        """Text-conditional FiLM modulation: x*gamma + beta on channel dim."""
+        gb = self.film_mlp[idx](proj)                 # (B, 2*dim)
+        gamma, beta = gb.chunk(2, dim=-1)
+        return x * gamma.unsqueeze(1) + beta.unsqueeze(1)
 
     def forward(self, data):
 
@@ -111,8 +124,14 @@ class LanGuideMedSeg(nn.Module):
         else:
             text_guide = text_embeds[-1]
         os16 = self.decoder16(os32,image_features[2], text_guide)
+        if self.film:
+            os16 = self._film(os16, text_project, 0)
         os8 = self.decoder8(os16,image_features[1], text_guide)
+        if self.film:
+            os8 = self._film(os8, text_project, 1)
         os4 = self.decoder4(os8,image_features[0], text_guide)
+        if self.film:
+            os4 = self._film(os4, text_project, 2)
         os4 = rearrange(os4, 'B (H W) C -> B C H W',H=self.spatial_dim[-1],W=self.spatial_dim[-1])
 
         aux_logits = None

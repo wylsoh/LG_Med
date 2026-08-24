@@ -1,20 +1,22 @@
 import json
 import os
+import random
 import torch
 import pandas as pd
 from monai.transforms import (AddChanneld, Compose, Lambdad, NormalizeIntensityd,RandCoarseShuffled,RandRotated,RandZoomd,
                               Resized, ToTensord, LoadImaged, EnsureChannelFirstd)
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer
-from utils.text_process import parse_caption, to_labels
+from utils.text_process import parse_caption, to_labels, build_variant
 
 class QaTa(Dataset):
 
-    def __init__(self, csv_path=None, root_path=None, tokenizer=None, mode='train',image_size=[224,224], return_attrs=False):
+    def __init__(self, csv_path=None, root_path=None, tokenizer=None, mode='train',image_size=[224,224], return_attrs=False, tanda=False):
 
         super(QaTa, self).__init__()
 
         self.mode = mode
+        self.tanda = tanda
 
         with open(csv_path, 'r') as f:
             self.data = pd.read_csv(f)
@@ -51,6 +53,9 @@ class QaTa(Dataset):
         image = os.path.join(self.root_path,'Images',self.image_list[idx].replace('mask_',''))
         gt = os.path.join(self.root_path,'GTs', self.image_list[idx])
         caption = self.caption_list[idx]
+        if self.tanda and self.mode == 'train' and random.random() < 0.5:
+            # TANDA: 用结构化等价变体做文本增强 (抗错字/句法噪声)
+            caption = build_variant(parse_caption(caption), 'keyword')
 
         token_output = self.tokenizer.encode_plus(caption, padding='max_length',
                                                         max_length=24, 
