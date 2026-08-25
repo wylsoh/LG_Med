@@ -40,7 +40,8 @@ if __name__ == '__main__':
 
     # dataloader
     return_attrs = (getattr(args, 'use_aux', False)
-                    or getattr(args, 'count_loss_weight', 0) > 0)
+                    or getattr(args, 'count_loss_weight', 0) > 0
+                    or getattr(args, 'side_gate', False))
     ds_test = QaTa(csv_path=args.test_csv_path,
                     root_path=args.test_root_path,
                     tokenizer=args.bert_type,
