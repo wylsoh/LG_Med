@@ -23,6 +23,7 @@ class LanGuideMedSegWrapper(pl.LightningModule):
         self.count_loss_weight = getattr(args, 'count_loss_weight', 0.0)
         self.clip_weight = getattr(args, 'clip_weight', 0.0)
         self.clip_clean = getattr(args, 'clip_clean', False)
+        self.side_gate = getattr(args, 'side_gate', False)
         if self.clip_clean:
             # 对齐前先对分割图做形态学去碎片, 再用投影头提取对齐特征
             self.seg_align = nn.Sequential(
@@ -91,6 +92,9 @@ class LanGuideMedSegWrapper(pl.LightningModule):
 
     def shared_step(self,batch,batch_idx):
         x, y = batch
+        if self.side_gate and self.training:
+            # 训练时: 未声明侧(文本 nature/location)强制背景, 实现侧别门控
+            y = self._gate_side(y, x[1]['attrs'])
         out = self(x)
         if self.use_aux:
             preds, aux_logits = out
@@ -121,6 +125,25 @@ class LanGuideMedSegWrapper(pl.LightningModule):
             if not self.training:
                 self._collect_count_stats(preds, x[1]['attrs'], ret)
         return ret
+
+    def _gate_side(self, y, attrs):
+        """Zero-out the non-declared lung side(s) in the GT mask (side gating).
+
+        The text (nature + location) declares which side(s) have infection;
+        the other side is forced to background so the model learns to segment
+        ONLY the declared side(s). Applied at training time only; evaluation
+        uses the full GT.
+        """
+        y = y.clone()
+        side_L = attrs['side_L'].to(y.device)
+        side_R = attrs['side_R'].to(y.device)
+        W2 = y.shape[-1] // 2
+        for b in range(y.shape[0]):
+            if not side_L[b].item():
+                y[b, :, :, :W2] = 0
+            if not side_R[b].item():
+                y[b, :, :, W2:] = 0
+        return y
 
     def _clip_loss(self, img, txt, temperature=0.07):
         """Symmetric InfoNCE (CLIP-style) aligning image & text projections.

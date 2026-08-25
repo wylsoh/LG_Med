@@ -80,6 +80,8 @@ class QaTa(Dataset):
                 'quantity_ok': torch.tensor(bool(a['quantity_ok']), dtype=torch.bool),
                 'location': torch.tensor(a['location'], dtype=torch.float),
                 'location_ok': torch.tensor(bool(a['location_ok']), dtype=torch.bool),
+                'side_L': torch.tensor(bool(sum(a['location'][0:3])), dtype=torch.bool),
+                'side_R': torch.tensor(bool(sum(a['location'][3:6])), dtype=torch.bool),
             }
 
         return ([image, text], gt)
