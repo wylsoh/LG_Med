@@ -25,7 +25,7 @@ _SIDE_PREFIX = {"left": "L", "right": "R"}
 _VERTICALS = ("upper", "middle", "lower")
 
 # Supported text modes for build_variant()
-MODES = ("full", "nature", "quantity", "location", "keyword")
+MODES = ("full", "nature", "quantity", "location", "keyword", "none")
 
 # ---------------------------------------------------------------------------
 # Regexes (all case-insensitive, robust to spacing issues)
@@ -138,11 +138,14 @@ def build_variant(parsed: Dict, mode: str = "full") -> str:
       quantity -> second sentence only ("two infected areas")
       location -> third sentence only  ("all left lung and middle lower right lung.")
       keyword  -> compact structured   ("bilateral 2 middle lower right lung")
+      none     -> empty string (NO text; pure-vision lower bound)
 
     Falls back to the raw caption if the requested attribute is not parseable.
     """
     if mode == "full":
         return parsed["raw"]
+    if mode == "none":
+        return ""
 
     nature_s = "bilateral" if parsed["nature"] == 1 else (
         "unilateral" if parsed["nature"] == 0 else None)
