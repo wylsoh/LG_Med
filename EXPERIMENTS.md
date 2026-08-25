@@ -81,18 +81,21 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 | C1 count_full | aux-supervision | config/exp/count_full.yaml | ~1.37 (16) | 0.301 | 0.177 | 0.3641 | 0.2226 | 计数监督致分割崩溃;test count_acc=0.386 |
 | C2 count_location | aux-supervision | config/exp/count_location.yaml | ~0.89 (34) | 0.192 | 0.106 | 0.2441 | 0.1390 | 同上;test count_acc=0.755 虚高 |
 | C3 count_weighted | aux-supervision | config/exp/count_weighted.yaml | ~0.82 (0) | 0.211 | 0.118 | 0.3356 | 0.2017 | 类加权+只监督多区域仍崩;连通域回归损失不可行 |
-| C4 aux_quantity_weighted | aux-supervision | config/exp/aux_quantity_weighted.yaml | ~0.18 (34) | — | — | **0.8904** | **0.8025** | 数量分类头监督成功:test_count_acc(面积过滤后)=**91.2%** |
-| E11 aux_nature | aux-supervision | config/exp/aux_nature.yaml | ~0.22 (—) | 0.859 | 0.754 | 0.8896 | 0.8011 | 性质分类头监督:dice 持平但 count_acc(面积过滤后)=**81.7%**,低于基线 |
-| E12 clip_full | aux-supervision | config/exp/clip_full.yaml | ~0.48 (34) | 0.856 | 0.749 | 0.8825 | 0.7897 | CLIP 对比对齐损失:未提升,面积过滤 count_acc=**49%**,区域拓扑受损 |
-| E13 unfreeze_full | aux-supervision | config/exp/unfreeze_full.yaml | ~0.31 (43) | 0.860 | 0.752 | 0.8914 | 0.8040 | 解冻 BERT 末2层:略低于基线,count_acc=85.8% |
-| E14 multitext_full | aux-supervision | config/exp/multitext_full.yaml | ~0.32 (33) | 0.861 | 0.753 | 0.8907 | 0.8029 | 多层文本特征:略低于基线,count_acc=87.1% |
-| E15 clip_clean | aux-supervision | config/exp/clip_clean_full.yaml | ~0.36 (0) | 0.746 | 0.595 | 0.8922 | 0.8054 | 去碎片对齐:修复CLIP碎片化,count_acc=**88.0%** |
-| E16 film_full | aux-supervision | config/exp/film_full.yaml | ~0.30 (—) | 0.857 | 0.751 | 0.8913 | 0.8039 | **FiLM调制:count_acc=90.0%**(提升) |
-| E17 tanda_full | aux-supervision | config/exp/tanda_full.yaml | ~0.31 (—) | 0.857 | 0.750 | 0.8874 | 0.7976 | TANDA文本增强:无提升,count_acc=86.8% |
-| E18 aux_quantity_location | aux-supervision | config/exp/aux_quantity_location.yaml | ~0.31 (—) | 0.841 | 0.729 | 0.8613 | 0.7564 | 数量头+方位句:坏组合,count_acc=**25%**(文本缺数量词) |
-| E19 aux_quantity_w10 | aux-supervision | config/exp/aux_quantity_w10.yaml | ~0.30 (—) | 0.857 | 0.750 | 0.8874 | 0.7976 | 数量头 weight1.0:count_acc=88.7% |
-| E20 aux_quantity_unfreeze | aux-supervision | config/exp/aux_quantity_unfreeze.yaml | ~0.30 (—) | 0.856 | 0.749 | 0.8869 | 0.7968 | 数量头+解冻:count_acc=88.1% |
-| E21 aux_quantity_multitext | aux-supervision | config/exp/aux_quantity_multitext.yaml | ~0.31 (—) | 0.859 | 0.753 | 0.8888 | 0.7999 | 数量头+多层文本:count_acc=**90.1%** ≈ C4 |
+| C4 aux_quantity_weighted | aux-supervision | config/exp/aux_quantity_weighted.yaml | ~0.18 (34) | — | — | **0.8904** | **0.8025** | 数量分类头监督成功:test_count_acc(面积过滤后)=**91.3%** |
+| E11 aux_nature | aux-supervision | config/exp/aux_nature.yaml | ~0.22 (—) | 0.859 | 0.754 | 0.8896 | 0.8011 | 性质分类头:dice 持平,count_acc(面积过滤后)=**91.2%**(≈C4) |
+| E12 clip_full | aux-supervision | config/exp/clip_full.yaml | ~0.48 (34) | 0.856 | 0.749 | 0.8825 | 0.7897 | CLIP 对比对齐损失:未提升,面积过滤 count_acc=**87.8%**(低于基线) |
+| E13 unfreeze_full | aux-supervision | config/exp/unfreeze_full.yaml | ~0.31 (43) | 0.860 | 0.752 | 0.8914 | 0.8040 | 解冻 BERT 末2层:略低于基线,count_acc=90.1% |
+| E14 multitext_full | aux-supervision | config/exp/multitext_full.yaml | ~0.32 (33) | 0.861 | 0.753 | 0.8907 | 0.8029 | 多层文本特征:略低于基线,count_acc=89.7% |
+| E15 clip_clean | aux-supervision | config/exp/clip_clean_full.yaml | ~0.36 (0) | 0.746 | 0.595 | 0.8922 | 0.8054 | 去碎片对齐:修复CLIP碎片化,count_acc=**90.5%** |
+| E16 film_full | aux-supervision | config/exp/film_full.yaml | ~0.30 (—) | 0.857 | 0.751 | 0.8913 | 0.8039 | **FiLM调制:count_acc=91.0%** |
+| E17 tanda_full | aux-supervision | config/exp/tanda_full.yaml | ~0.31 (—) | 0.857 | 0.750 | 0.8874 | 0.7976 | TANDA文本增强:无提升,count_acc=89.7% |
+| E18 aux_quantity_location | aux-supervision | config/exp/aux_quantity_location.yaml | ~0.31 (—) | 0.841 | 0.729 | 0.8613 | 0.7564 | 数量头+方位句:坏组合,count_acc=**70.8%**(文本缺数量词,最差) |
+| E19 aux_quantity_w10 | aux-supervision | config/exp/aux_quantity_w10.yaml | ~0.30 (—) | 0.857 | 0.750 | 0.8874 | 0.7976 | 数量头 weight1.0:count_acc=90.3% |
+| E20 aux_quantity_unfreeze | aux-supervision | config/exp/aux_quantity_unfreeze.yaml | ~0.30 (—) | 0.856 | 0.749 | 0.8869 | 0.7968 | 数量头+解冻:count_acc=89.4% |
+| E21 aux_quantity_multitext | aux-supervision | config/exp/aux_quantity_multitext.yaml | ~0.31 (—) | 0.859 | 0.753 | 0.8888 | 0.7999 | 数量头+多层文本:count_acc=**90.8%** |
+| E22 side_gate | aux-supervision | config/exp/side_gate_full.yaml | ~0.31 (—) | 0.857 | 0.750 | 0.8486 | 0.7370 | 侧别门控(中线拆分+性质句):dice 明显下降,count_acc=87.8% |
+
+> ⚠️ **评估方法修正(重要)**:模型输出 `out` 已是 sigmoid 概率,早期分析脚本重复套 sigmoid 造成假碎片化。修正阈值(`out>0.5`)后,所有 count_acc 数值已重评(见 §3 更新)。修正后基线 count_acc(200px)=**90.7%**(原 87.3%),各模型提升幅度整体缩小。
 
 > ⚠️ **关键发现(全部实验)**:
 > 1. **完整三句(full)在 val/test 上均优于任何单句**——与论文「stage3 单独最优」不一致。
@@ -107,24 +110,22 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 >    原因:数量标签严重不平衡(two 占 ~74%),计数损失被多数类主导,压过 DiceCE,导致模型牺牲分割质量换取计数"正确"。
 > 7. **类别不平衡修复(C 选项)结论**:
 >    - **C3 类加权连通域回归仍失败**(dice 0.336):即使逆频率加权 + 只监督多区域 + 降权 0.3,连通域计数回归损失与像素级分割本质冲突 → **连通域回归监督这条路不可行**。
->    - **C4 数量分类头监督成功**:在深层特征上直接分类数量(加权 CE,aux_weight=0.3),**test_dice 0.8904 ≈ 基线 0.8947 且 count_acc(面积过滤后)达 91.2%**,少数类 three/four 提升 +12~25pp。
-> 8. **连通域作为评估指标必须先做面积过滤**:未经后处理时,dice=0.89 的基线分割图因噪声小碎片,连通域数从正确值暴涨到 8~16,count_acc≈0%;过滤 <200px 组件后才有意义(基线 87.3%,C4 91.2%)。
-> 9. **「区域数量准确性」的提升来自「数量」监督信号本身(对照 E11)**:
->    - 数量分类头 C4:count_acc **91.2%** > 基线 87.3%(+3.9pp,少数类 three/four 大提升);
->    - 性质分类头 E11:count_acc **81.7%** < 基线 87.3%(-5.6pp,true2 84% vs 92%、true3 37% vs 40%);
->    - 二者 test_dice 均 ≈0.89(与基线持平)→ 证明:辅助头机制本身不带来收益,真正起作用的是**数量语义**对区域拓扑的引导;冗余的性质信号甚至轻微干扰区域计数。
-> 10. **CLIP 式图文对比对齐(E12)是负结果**:test_dice 0.8825(<基线 0.8947),面积过滤后 count_acc 仅 **49%**(<基线 87.3%)。
->    全局池化图像特征与文本嵌入的 InfoNCE 对齐虽不损害像素级 dice,但**破坏分割图的区域拓扑**(碎片化),区域数量准确性大幅下降 → 简单的全局对齐损失不适配本任务。
-> 11. **unfreeze / multitext(文本利用增强)也无提升**:解冻 BERT 末 2 层(test_dice 0.8914,count_acc 85.8%)、多层文本特征融合(0.8907,87.1%)均略低于基线(0.8947 / 87.3%)。
->     → 在交叉注意力框架下,增强文本编码/表示都无法超越基线;**唯一能提升区域计数准确性的是数量分类头监督(C4,91.2%)**。> 12. **clip_clean(去碎片后对齐)验证了碎片化假设**:对齐前做可微形态学开运算(kernel=5)后,CLIP 的 count_acc 从 49% 修复到 **88.0%**(≈基线 87.3%),dice 0.8825→0.8922。
->    → 证明原 CLIP 失败根源确为碎片化;但修复后全局对齐对区域计数的增益有限(88.0% vs 87.3%),仍不及数量分类头 C4(91.2%)——**区域计数仍需要数量语义的显式引导**。
-> 13. **FiLM 文本条件调制(E16)是继数量分类头后第二个提升区域计数的方法**:count_acc **90.0%**(>基线 87.3%,≈C4 91.2%),true3 48% / true4 38%(基线 40%/25%),test_dice 0.8913 接近基线。
->    → 显式的文本条件调制(scale/shift)比隐式交叉注意力更利于区域结构;是除数量头外最有潜力的方向。
-> 14. **TANDA 文本增强(E17)无提升**:count_acc 86.8%(≈基线),dice 0.8874 略低 → 结构化等价变体增强不能带来增益。
-> 15. **数量头组合实验(E18-E21)**:
->    - E18 数量头+方位句:count_acc 仅 **25%** → **数量头必须从文本读到数量词**(location 文本缺失数量信息,坏组合);
->    - E19/E20(weight1.0/解冻):88.7%/88.1%,略低于 C4(0.3 权重,91.2%);
->    - **E21 数量头+多层文本:90.1% ≈ C4(91.2%)** → 多层文本融合与数量头兼容良好。> 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
+>    - **C4 数量分类头监督**:在深层特征上直接分类数量(加权 CE,aux_weight=0.3),test_dice 0.8904 ≈ 基线 0.8947,count_acc(面积过滤后)=**91.3%**(基线 90.7%,+0.6pp);少数类 true3 50%(基线 45%)、true4 50%(基线 25%)。增益有限但方向正确。
+> 8. **连通域作为评估指标必须先做面积过滤**:未经后处理时,分割图因噪声小碎片,连通域数从正确值暴涨,count_acc 失真;过滤 <200px 组件后才有意义(修正后基线 90.7%,C4 91.3%)。
+> 9. **修正后「数量头 vs 性质头」增益均有限(原结论被推翻)**:修正评估后,数量头 C4 count_acc=91.3%、性质头 E11=91.2%、基线=90.7%——三者几乎持平(±0.6pp)。
+>    原「性质头损害区域计数(81.7%)」是双重 sigmoid 评估 bug 的假象。→ 辅助分类头监督本身**增益有限**(+0.5~0.6pp),远小于此前估计。
+> 10. **CLIP 式图文对比对齐(E12)略有害**:test_dice 0.8825(<基线 0.8947),面积过滤后 count_acc=87.8%(<基线 90.7%)。
+>    全局池化图像特征与文本嵌入的 InfoNCE 对齐轻微破坏分割(dice 与区域计数均略降),简单的全局对齐损失不适配本任务。
+> 11. **unfreeze / multitext(文本利用增强)也无提升**:解冻 BERT 末 2 层(count_acc 90.1%)、多层文本特征融合(89.7%),均略低于基线(90.7%)。
+>     → 在交叉注意力框架下,增强文本编码/表示都无法超越基线。 12. **clip_clean(去碎片后对齐)小幅修复 CLIP**:clip_full 87.8% → clip_clean 90.5%(去碎片 +2.7pp),dice 0.8825→0.8922。
+>    → 去碎片确实缓解了对齐对区域结构的扰动,但修复后与基线(90.7%)基本持平,增益有限。
+> 13. **FiLM 文本条件调制(E16)**:count_acc=91.0%(≈C4 91.3%、≈基线 90.7%),test_dice 0.8913 接近基线。显式文本调制与基线持平,无明显增益。
+> 14. **TANDA 文本增强(E17)无提升**:count_acc=89.7%(≈基线),dice 0.8874 略低。
+> 15. **数量头组合实验(E18-E21,修正后)**:
+>    - E18 数量头+方位句:count_acc=**70.8%**(仍最差)→ **数量头必须从文本读到数量词**;
+>    - E19/E20(weight1.0/解冻):90.3%/89.4%;E21 数量头+多层文本:**90.8%**——均与基线(90.7%)/C4(91.3%)相当,无显著增益。
+> 16. **侧别门控(E22 side_gate)是负结果**:按左右肺中线拆分 + 性质句门控(训练时未声明侧强制背景)导致 test_dice 0.8486(<基线 0.8947)、count_acc 87.8%(<基线 90.7%)。
+>    中线拆分不精确 + bilateral 学习受损,强制侧别门控反而损害分割。> 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
 > 待 E4/E5/E6/E7 完成以补全曲线。
 
 ---
