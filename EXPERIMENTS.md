@@ -94,6 +94,8 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 | E20 aux_quantity_unfreeze | aux-supervision | config/exp/aux_quantity_unfreeze.yaml | ~0.30 (—) | 0.856 | 0.749 | 0.8869 | 0.7968 | 数量头+解冻:count_acc=89.4% |
 | E21 aux_quantity_multitext | aux-supervision | config/exp/aux_quantity_multitext.yaml | ~0.31 (—) | 0.859 | 0.753 | 0.8888 | 0.7999 | 数量头+多层文本:count_acc=**90.8%** |
 | E22 side_gate | aux-supervision | config/exp/side_gate_full.yaml | ~0.31 (—) | 0.857 | 0.750 | 0.8486 | 0.7370 | 侧别门控(中线拆分+性质句):dice 明显下降,count_acc=87.8% |
+| E23 no_text | aux-supervision | config/exp/no_text.yaml | 0.3044 (28) | 0.7760 | 0.6339 | 0.8276 | 0.7059 | 无文本(空文本)纯视觉基线;count_acc=72.3% |
+| E24 mix_kw | aux-supervision | config/exp/mix_kw.yaml | 0.2189 (43) | 0.8596 | 0.7537 | 0.8906 | 0.8028 | 性质kw+数量kw+方位整句;dice≈基线,count_acc=76.9% |
 
 > ⚠️ **评估方法修正(重要)**:模型输出 `out` 已是 sigmoid 概率,早期分析脚本重复套 sigmoid 造成假碎片化。修正阈值(`out>0.5`)后,所有 count_acc 数值已重评(见 §3 更新)。修正后基线 count_acc(200px)=**90.7%**(原 87.3%),各模型提升幅度整体缩小。
 
@@ -127,6 +129,8 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 >    - E19/E20(weight1.0/解冻):90.3%/89.4%;E21 数量头+多层文本:**90.8%**——均与基线(90.7%)/C4(91.3%)相当,无显著增益。
 > 16. **侧别门控(E22 side_gate)是负结果**:按左右肺中线拆分 + 性质句门控(训练时未声明侧强制背景)导致 test_dice 0.8486(<基线 0.8947)、count_acc 87.8%(<基线 90.7%)。
 >    中线拆分不精确 + bilateral 学习受损,强制侧别门控反而损害分割。
+> 17. **无文本基线(E23 no_text)**:完全去除文本(空文本)后 test_dice 0.8276(<基线 0.8947)、count_acc 72.3%(<基线 90.7%)——文本引导(尤其数量/位置信息)对分割与区域计数贡献显著。
+> 18. **混合输入(E24 mix_kw)**:性质/数量用关键词、方位保留整句,test_dice 0.8906(≈基线)但 count_acc 76.9%(明显低于基线)→ 数量词须以完整句子形式("two infected areas")呈现才能有效约束连通域数量,孤立关键词会削弱数量监督。
 > 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
 > 待 E4/E5/E6/E7 完成以补全曲线。
 

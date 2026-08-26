@@ -25,7 +25,7 @@ _SIDE_PREFIX = {"left": "L", "right": "R"}
 _VERTICALS = ("upper", "middle", "lower")
 
 # Supported text modes for build_variant()
-MODES = ("full", "nature", "quantity", "location", "keyword", "none")
+MODES = ("full", "nature", "quantity", "location", "keyword", "none", "mix_kw")
 
 # ---------------------------------------------------------------------------
 # Regexes (all case-insensitive, robust to spacing issues)
@@ -34,6 +34,7 @@ _NATURE_RE = re.compile(r"\b(unilateral|bilateral)\b", re.IGNORECASE)
 
 _QUANTITY_RE = re.compile(r"\b(one|two|three|four)\s+infected", re.IGNORECASE)
 _QUANTITY_MAP = {"one": 1, "two": 2, "three": 3, "four": 4}
+_QUANTITY_WORDS = {1: "one", 2: "two", 3: "three", 4: "four"}
 
 # One spatial region, e.g.:
 #   "all left lung"                          -> all verticals of left lung
@@ -160,6 +161,13 @@ def build_variant(parsed: Dict, mode: str = "full") -> str:
         return loc_s if loc_s else parsed["raw"]
     if mode == "keyword":
         parts = [p for p in (nature_s, quantity_s, loc_s) if p]
+        return ", ".join(parts) if parts else parsed["raw"]
+    if mode == "mix_kw":
+        # nature + quantity as single keywords (kw_nature/kw_quantity style),
+        # location kept as the full sentence (E2 location style).
+        kw_q = (_QUANTITY_WORDS.get(parsed["quantity"])
+                if parsed["quantity_ok"] else None)
+        parts = [p for p in (nature_s, kw_q, loc_s) if p]
         return ", ".join(parts) if parts else parsed["raw"]
 
     raise ValueError(f"Unknown mode: {mode!r}. Supported: {MODES}")
