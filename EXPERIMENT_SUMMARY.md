@@ -85,6 +85,7 @@
 | E22 | side_gate | full + 侧别门控(中线拆分) | 0.8486 | 0.7370 | dice 明显下降,count_acc 87.8% |
 | E23 | no_text | 无文本(空文本,纯视觉) | 0.8276 | 0.7059 | count_acc 72.3%(基线90.7%) |
 | E24 | mix_kw | 性质kw+数量kw+方位整句 | 0.8906 | 0.8028 | dice≈基线,count_acc 76.9%(明显低于基线) |
+| E25 | full_rerun | 完整三句(复跑) | 0.8891 | 0.8003 | 基线复跑,count_acc 89.4%(波动±1.3pp) |
 
 ### 3.3 C4 分层连通域评估(面积过滤 min_area=200px,修正阈值)
 | 指标 | C4 aux_quantity_weighted | 基线 E1 full |
