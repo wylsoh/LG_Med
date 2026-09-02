@@ -54,38 +54,40 @@
 2. **关键词监督辅助损失**(E6,E7,C4):解码特征接分类头,用解析关键词监督
 3. **连通域计数监督**(C1-C3):可微欧拉计数 + 精确连通域评估
 
-### 3.2 结果总表(test 集)
-| # | 实验 | 文本/监督 | test_dice | test_MIoU | 备注 |
-|---|---|---|---|---|---|
-| E1 | full | 完整三句(基线) | **0.8947** | 0.8094 | 最优 |
-| E2 | location | 仅方位句 | 0.8897 | 0.8014 | 接近基线 |
-| E3 | nature | 仅性质句 | 0.8273 | — | |
-| E4 | quantity | 仅数量句 | 0.8308 | — | |
-| E5 | keyword | 结构化关键词 | 0.8881 | — | |
-| E8 | kw_nature | 仅性质关键词 | 0.8328 | — | |
-| E9 | kw_quantity | 仅数量关键词 | 0.8340 | — | |
-| E10 | kw_location | 仅方位关键词 | 0.8842 | — | |
-| E6 | aux_full | full + 三头辅助损失 | 0.8919 | — | 未提升 |
-| E7 | aux_location | location + 辅助损失 | 0.8792 | 0.7844 | 未提升 |
-| C1 | count_full | full + 连通域回归 | 0.3641 | 0.2226 | 崩溃 |
-| C2 | count_location | location + 连通域回归 | 0.2441 | 0.1390 | 崩溃 |
-| C3 | count_weighted | full + 类加权回归 | 0.3356 | 0.2017 | 仍崩 |
-| **C4** | **aux_quantity_weighted** | full + **数量分类头(加权CE)** | **0.8904** | **0.8025** | count_acc **91.3%**(基线90.7%,+0.6pp) |
-| E11 | aux_nature | full + 性质分类头(加权CE) | 0.8896 | 0.8011 | count_acc 91.2%(≈C4) |
-| E12 | clip_full | full + CLIP 全局对齐 | 0.8825 | 0.7897 | count_acc 87.8%(低于基线) |
-| E13 | unfreeze_full | full + 解冻 BERT 末2层 | 0.8914 | 0.8040 | count_acc 90.1% |
-| E14 | multitext_full | full + 多层文本特征 | 0.8907 | 0.8029 | count_acc 89.7% |
-| E15 | clip_clean | full + 去碎片后对齐 | 0.8922 | 0.8054 | 修复CLIP:count_acc 90.5% |
-| E16 | film_full | full + FiLM 调制 | 0.8913 | 0.8039 | count_acc **91.0%**(≈C4) |
-| E17 | tanda_full | full + TANDA 文本增强 | 0.8874 | 0.7976 | count_acc 89.7% |
-| E18 | aux_quantity_location | location + 数量头 | 0.8613 | 0.7564 | count_acc **70.8%**(坏组合最差) |
-| E19 | aux_quantity_w10 | full + 数量头(weight1.0) | 0.8874 | 0.7976 | count_acc 90.3% |
-| E20 | aux_quantity_unfreeze | full + 数量头+解冻 | 0.8869 | 0.7968 | count_acc 89.4% |
-| E21 | aux_quantity_multitext | full + 数量头+多层文本 | 0.8888 | 0.7999 | count_acc **90.8%** |
-| E22 | side_gate | full + 侧别门控(中线拆分) | 0.8486 | 0.7370 | dice 明显下降,count_acc 87.8% |
-| E23 | no_text | 无文本(空文本,纯视觉) | 0.8276 | 0.7059 | count_acc 72.3%(基线90.7%) |
-| E24 | mix_kw | 性质kw+数量kw+方位整句 | 0.8906 | 0.8028 | dice≈基线,count_acc 76.9%(明显低于基线) |
-| E25 | full_rerun | 完整三句(复跑) | 0.8891 | 0.8003 | 基线复跑,count_acc 89.4%(波动±1.3pp) |
+### 3.2 结果总表(test 集,三指标 Acc/Dice/Jaccard)
+| # | 实验 | 文本/监督 | test_acc | test_dice | test_MIoU | 备注 |
+|---|---|---|---|---|---|---|
+| E1 | full | 完整三句(基线,ckpt丢失) | — | 0.8947 | 0.8094 | 最优(历史) |
+| E2 | location | 仅方位句(ckpt丢失) | — | 0.8897 | 0.8014 | 接近基线 |
+| E3 | nature | 仅性质句(ckpt丢失) | — | 0.8273 | — | |
+| E4 | quantity | 仅数量句(ckpt丢失) | — | 0.8308 | — | |
+| E5 | keyword | 结构化关键词(ckpt丢失) | — | 0.8881 | — | |
+| E8 | kw_nature | 仅性质关键词(ckpt丢失) | — | 0.8328 | — | |
+| E9 | kw_quantity | 仅数量关键词(ckpt丢失) | — | 0.8340 | — | |
+| E10 | kw_location | 仅方位关键词(ckpt丢失) | — | 0.8842 | — | |
+| E6 | aux_full | full + 三头辅助损失(ckpt丢失) | — | 0.8919 | — | 未提升 |
+| E7 | aux_location | location + 辅助损失 | 0.9713 | 0.8792 | 0.7844 | 未提升 |
+| C1 | count_full | full + 连通域回归 | — | 0.3641 | 0.2226 | 崩溃 |
+| C2 | count_location | location + 连通域回归 | — | 0.2441 | 0.1390 | 崩溃 |
+| C3 | count_weighted | full + 类加权回归 | — | 0.3356 | 0.2017 | 仍崩 |
+| **C4** | **aux_quantity_weighted** | full + **数量分类头(加权CE)** | 0.9734 | 0.8904 | 0.8025 | count_acc **91.3%**(基线90.7%,+0.6pp) |
+| E11 | aux_nature | full + 性质分类头(加权CE) | 0.9732 | 0.8896 | 0.8011 | count_acc 91.2%(≈C4) |
+| E12 | clip_full | full + CLIP 全局对齐 | 0.9713 | 0.8825 | 0.7897 | count_acc 87.8%(低于基线) |
+| E13 | unfreeze_full | full + 解冻 BERT 末2层 | 0.9737 | 0.8914 | 0.8040 | count_acc 90.1% |
+| E14 | multitext_full | full + 多层文本特征 | 0.9735 | 0.8907 | 0.8029 | count_acc 89.7% |
+| E15 | clip_clean | full + 去碎片后对齐 | 0.9738 | 0.8922 | 0.8054 | 修复CLIP:count_acc 90.5% |
+| E16 | film_full | full + FiLM 调制 | 0.9732 | 0.8913 | 0.8039 | count_acc **91.0%**(≈C4) |
+| E17 | tanda_full | full + TANDA 文本增强 | 0.9727 | 0.8874 | 0.7976 | count_acc 89.7% |
+| E18 | aux_quantity_location | location + 数量头 | 0.9658 | 0.8613 | 0.7564 | count_acc **70.8%**(坏组合最差) |
+| E19 | aux_quantity_w10 | full + 数量头(weight1.0) | 0.9725 | 0.8874 | 0.7976 | count_acc 90.3% |
+| E20 | aux_quantity_unfreeze | full + 数量头+解冻 | 0.9727 | 0.8869 | 0.7968 | count_acc 89.4% |
+| E21 | aux_quantity_multitext | full + 数量头+多层文本 | 0.9727 | 0.8888 | 0.7999 | count_acc **90.8%** |
+| E22 | side_gate | full + 侧别门控(中线拆分) | 0.9653 | 0.8486 | 0.7370 | dice 明显下降,count_acc 87.8% |
+| E23 | no_text | 无文本(空文本,纯视觉) | 0.9574 | 0.8276 | 0.7059 | count_acc 72.3%(基线90.7%) |
+| E24 | mix_kw | 性质kw+数量kw+方位整句 | 0.9735 | 0.8906 | 0.8028 | dice≈基线,count_acc 76.9%(明显低于基线) |
+| E25 | full_rerun | 完整三句(复跑) | 0.9731 | 0.8891 | 0.8003 | 基线复跑,count_acc 89.4%(波动±1.3pp) |
+| E26 | full_seed42 | 完整三句(固定种子42) | 0.9741 | 0.8923 | 0.8056 | 固定种子标准基线,count_acc 91.0% |
+| E27 | no_pos | full + 去GuideDecoder位置编码(seed42) | **0.9744** | **0.8950** | **0.8100** | 像素级略高于同种子基线,count_acc 90.9% |
 
 ### 3.3 C4 分层连通域评估(面积过滤 min_area=200px,修正阈值)
 | 指标 | C4 aux_quantity_weighted | 基线 E1 full |
@@ -118,6 +120,10 @@
 ### 4.4 数据/指标层面结论
 - **数量词非噪声**:与真实连通域一致率 97%+(Spearman 0.95+),是可靠监督信号;8.6% 不一致源于位置句少写/多写区域。
 - **nature × quantity 近乎冗余**(V=0.979),削弱二者单独监督的价值。
+
+### 4.5 结构/种子层面结论
+- **固定种子基线(E26 full_seed42)**:seed=42 下 baseline dice 0.8923 / acc 0.9741 / count_acc 91.0%,作为后续可比的标准基线(随机复跑 E25 为 0.8891/89.4%,波动约 ±0.005 dice)。
+- **去掉位置编码(E27 no_pos)**:去除 GuideDecoder 全部位置编码(vis_pos/txt_pos)后,像素级三项(acc 0.9744 / dice **0.8950** / Jaccard 0.8100)**略高于同种子基线**,count_acc 持平(90.9%)——同种子下为纯结构效应,说明 **GuideDecoder 位置编码对该任务并非必要,甚至略显冗余**。
 - **连通域指标需面积过滤**:未过滤时受噪声小碎片影响 count_acc 偏低;过滤 <200px 组件后更稳健(修正后基线 90.7%)。
 
 ---

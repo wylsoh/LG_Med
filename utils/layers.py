@@ -31,11 +31,12 @@ class PositionalEncoding(nn.Module):
 
 class GuideDecoderLayer(nn.Module):
 
-    def __init__(self, in_channels:int, output_text_len:int, input_text_len:int=24, embed_dim:int=768):
+    def __init__(self, in_channels:int, output_text_len:int, input_text_len:int=24, embed_dim:int=768, use_pos:bool=True):
 
         super(GuideDecoderLayer, self).__init__()
 
         self.in_channels = in_channels
+        self.use_pos = use_pos
 
         self.self_attn_norm = nn.LayerNorm(in_channels)
         self.cross_attn_norm = nn.LayerNorm(in_channels)
@@ -50,8 +51,9 @@ class GuideDecoderLayer(nn.Module):
             nn.LeakyReLU(),
         )
 
-        self.vis_pos = PositionalEncoding(in_channels)
-        self.txt_pos = PositionalEncoding(in_channels,max_len=output_text_len)
+        if use_pos:
+            self.vis_pos = PositionalEncoding(in_channels)
+            self.txt_pos = PositionalEncoding(in_channels,max_len=output_text_len)
 
         self.norm1 = nn.LayerNorm(in_channels)
         self.norm2 = nn.LayerNorm(in_channels)
@@ -69,16 +71,19 @@ class GuideDecoderLayer(nn.Module):
 
         # Self-Attention
         vis2 = self.norm1(x)
-        q = k = self.vis_pos(vis2)
+        q = k = (self.vis_pos(vis2) if self.use_pos else vis2)
         vis2 = self.self_attn(q, k, value=vis2)[0]
         vis2 = self.self_attn_norm(vis2)
         vis = x + vis2
 
         # Cross-Attention
         vis2 = self.norm2(vis)
-        vis2,_ = self.cross_attn(query=self.vis_pos(vis2),
-                                   key=self.txt_pos(txt),
-                                   value=txt)
+        if self.use_pos:
+            vis2,_ = self.cross_attn(query=self.vis_pos(vis2),
+                                       key=self.txt_pos(txt),
+                                       value=txt)
+        else:
+            vis2,_ = self.cross_attn(query=vis2, key=txt, value=txt)
         vis2 = self.cross_attn_norm(vis2)
         vis = vis + self.scale*vis2
 
@@ -86,11 +91,11 @@ class GuideDecoderLayer(nn.Module):
 
 class GuideDecoder(nn.Module):
 
-    def __init__(self,in_channels, out_channels, spatial_size, text_len) -> None:
+    def __init__(self,in_channels, out_channels, spatial_size, text_len, use_pos:bool=True) -> None:
 
         super().__init__()
 
-        self.guide_layer = GuideDecoderLayer(in_channels,text_len)   # for skip
+        self.guide_layer = GuideDecoderLayer(in_channels,text_len,use_pos=use_pos)   # for skip
         self.spatial_size = spatial_size
         self.decoder = UnetrUpBlock(2,in_channels,out_channels,3,2,norm_name='BATCH')
 

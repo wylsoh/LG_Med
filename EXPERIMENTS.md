@@ -97,6 +97,46 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 | E23 no_text | aux-supervision | config/exp/no_text.yaml | 0.3044 (28) | 0.7760 | 0.6339 | 0.8276 | 0.7059 | 无文本(空文本)纯视觉基线;count_acc=72.3% |
 | E24 mix_kw | aux-supervision | config/exp/mix_kw.yaml | 0.2189 (43) | 0.8596 | 0.7537 | 0.8906 | 0.8028 | 性质kw+数量kw+方位整句;dice≈基线,count_acc=76.9% |
 | E25 full_rerun | aux-supervision | config/exp/full_rerun.yaml | ~0.22 (—) | 0.858 | 0.751 | 0.8891 | 0.8003 | 基线复跑;count_acc=89.4%(量化波动) |
+| E26 full_seed42 | aux-supervision | config/exp/full_seed42.yaml | ~0.22 (—) | ~0.86 | ~0.75 | 0.8923 | 0.8056 | 固定种子42标准基线;acc=0.9741,count_acc=91.0% |
+| E27 no_pos | aux-supervision | config/exp/no_pos_full.yaml | ~0.219 (—) | ~0.86 | ~0.75 | 0.8950 | 0.8100 | 去GuideDecoder位置编码(seed42);像素级略高于同种子基线,count_acc=90.9% |
+
+### 3.1 三指标汇总(Acc / Dice / Jaccard,test 集)
+
+> Acc/Dice/Jaccard 为原论文三个像素级评价指标(对应 `test_acc`/`test_dice`/`test_MIoU`)。标 "—" 者因 checkpoint 已丢失无法补测,仅保留历史 dice/MIoU。count_acc 为区域计数(面积过滤 200px)。
+
+| 实验 | 方法 | Acc | Dice | Jaccard | count_acc |
+|---|---|---|---|---|---|
+| E1 | full(基线,ckpt丢失) | — | 0.8947 | 0.8094 | 90.7% |
+| E2 | location(ckpt丢失) | — | 0.8897 | — | — |
+| E3 | nature(ckpt丢失) | — | 0.8273 | — | — |
+| E4 | quantity(ckpt丢失) | — | 0.8308 | — | — |
+| E5 | keyword(ckpt丢失) | — | 0.8881 | — | — |
+| E8 | kw_nature(ckpt丢失) | — | 0.8328 | — | — |
+| E9 | kw_quantity(ckpt丢失) | — | 0.8340 | — | — |
+| E10 | kw_location(ckpt丢失) | — | 0.8842 | — | — |
+| E6 | aux_full(ckpt丢失) | — | 0.8919 | — | — |
+| E7 | aux_location | 0.9713 | 0.8792 | 0.7844 | — |
+| C1 | count_full | — | 0.3641 | 0.2226 | 0.386 |
+| C2 | count_location | — | 0.2441 | 0.1390 | 0.755 |
+| C3 | count_weighted | — | 0.3356 | 0.2017 | — |
+| C4 | aux_quantity_weighted | 0.9734 | 0.8904 | 0.8025 | **91.3%** |
+| E11 | aux_nature | 0.9732 | 0.8896 | 0.8011 | 91.2% |
+| E12 | clip_full | 0.9713 | 0.8825 | 0.7897 | 87.8% |
+| E13 | unfreeze | 0.9737 | 0.8914 | 0.8040 | 90.1% |
+| E14 | multitext | 0.9735 | 0.8907 | 0.8029 | 89.7% |
+| E15 | clip_clean | 0.9738 | 0.8922 | 0.8054 | 90.5% |
+| E16 | film | 0.9732 | 0.8913 | 0.8039 | 91.0% |
+| E17 | tanda | 0.9727 | 0.8874 | 0.7976 | 89.7% |
+| E18 | aux_quantity_location | 0.9658 | 0.8613 | 0.7564 | 70.8% |
+| E19 | aux_quantity_w10 | 0.9725 | 0.8874 | 0.7976 | 90.3% |
+| E20 | aux_quantity_unfreeze | 0.9727 | 0.8869 | 0.7968 | 89.4% |
+| E21 | aux_quantity_multitext | 0.9727 | 0.8888 | 0.7999 | 90.8% |
+| E22 | side_gate | 0.9653 | 0.8486 | 0.7370 | 87.8% |
+| E23 | no_text | 0.9574 | 0.8276 | 0.7059 | 72.3% |
+| E24 | mix_kw | 0.9735 | 0.8906 | 0.8028 | 76.9% |
+| E25 | full_rerun | 0.9731 | 0.8891 | 0.8003 | 89.4% |
+| E26 | full_seed42(固定种子) | 0.9741 | 0.8923 | 0.8056 | 91.0% |
+| E27 | no_pos(去位置编码) | **0.9744** | **0.8950** | **0.8100** | 90.9% |
 
 > ⚠️ **评估方法修正(重要)**:模型输出 `out` 已是 sigmoid 概率,早期分析脚本重复套 sigmoid 造成假碎片化。修正阈值(`out>0.5`)后,所有 count_acc 数值已重评(见 §3 更新)。修正后基线 count_acc(200px)=**90.7%**(原 87.3%),各模型提升幅度整体缩小。
 
@@ -133,6 +173,8 @@ QaTa-COV19 的每条描述为单字符串,由三句逗号分隔:
 > 17. **无文本基线(E23 no_text)**:完全去除文本(空文本)后 test_dice 0.8276(<基线 0.8947)、count_acc 72.3%(<基线 90.7%)——文本引导(尤其数量/位置信息)对分割与区域计数贡献显著。
 > 18. **混合输入(E24 mix_kw)**:性质/数量用关键词、方位保留整句,test_dice 0.8906(≈基线)但 count_acc 76.9%(明显低于基线)→ 数量词须以完整句子形式("two infected areas")呈现才能有效约束连通域数量,孤立关键词会削弱数量监督。
 > 19. **基线复跑(E25 full_rerun)**:test_dice 0.8891(<E1 0.8947)、count_acc 89.4%(<E1 90.7%)——随机波动约 0.005 dice / 1.3pp count_acc。多数方法(0.888~0.892)均在此波动范围内,无显著提升;而 no_text(0.8276/72.3%)、mix_kw count_acc(76.9%)的下降远超波动,为真实退化。
+> 20. **固定种子基线(E26 full_seed42)**:固定 seed=42 重跑基线,test_dice 0.8923 / test_acc 0.9741 / count_acc 91.0%(> E25 随机复跑 0.8891/89.4%)——作为后续可比的标准基线。
+> 21. **去掉位置编码(E27 no_pos)**:去除 GuideDecoder 全部位置编码(self-attn q/k 的 vis_pos、cross-attn query 的 vis_pos、cross-attn key 的 txt_pos),与 E26 同 seed、其余同基线。test_dice 0.8950 / test_acc 0.9744 / test_MIoU 0.8100,**像素级三项均略高于同种子基线 E26(0.8923/0.9741/0.8056)**,count_acc 90.9%(≈E26 91.0%)。同种子下差异为纯结构效应 → **GuideDecoder 位置编码对该任务并非必要,甚至略显冗余**(去之像素级略好、计数持平)。
 > 可能原因:数据/标注版本差异、按 val_loss 选点 vs 论文选点方式、或现象在本数据不复现。
 > 待 E4/E5/E6/E7 完成以补全曲线。
 

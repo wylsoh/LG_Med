@@ -65,7 +65,8 @@ class VisionModel(nn.Module):
 class LanGuideMedSeg(nn.Module):
 
     def __init__(self, bert_type, vision_type, project_dim=512, use_aux=False,
-                 text_unfreeze_layers=0, multi_text=False, film=False):
+                 text_unfreeze_layers=0, multi_text=False, film=False,
+                 no_pos_enc=False):
 
         super(LanGuideMedSeg, self).__init__()
 
@@ -80,9 +81,9 @@ class LanGuideMedSeg(nn.Module):
         self.spatial_dim = [7,14,28,56]    # 224*224
         feature_dim = [768,384,192,96]
 
-        self.decoder16 = GuideDecoder(feature_dim[0],feature_dim[1],self.spatial_dim[0],24)
-        self.decoder8 = GuideDecoder(feature_dim[1],feature_dim[2],self.spatial_dim[1],12)
-        self.decoder4 = GuideDecoder(feature_dim[2],feature_dim[3],self.spatial_dim[2],9)
+        self.decoder16 = GuideDecoder(feature_dim[0],feature_dim[1],self.spatial_dim[0],24,use_pos=not no_pos_enc)
+        self.decoder8 = GuideDecoder(feature_dim[1],feature_dim[2],self.spatial_dim[1],12,use_pos=not no_pos_enc)
+        self.decoder4 = GuideDecoder(feature_dim[2],feature_dim[3],self.spatial_dim[2],9,use_pos=not no_pos_enc)
         self.decoder1 = SubpixelUpsample(2,feature_dim[3],24,4)
         self.out = UnetOutBlock(2, in_channels=24, out_channels=1)
 

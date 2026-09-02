@@ -13,6 +13,18 @@ from pytorch_lightning.callbacks import ModelCheckpoint,EarlyStopping
 import torch.multiprocessing
 torch.multiprocessing.set_sharing_strategy('file_system')
 import argparse
+import random
+import numpy as np
+
+
+def set_seed(seed: int = 42):
+    """Fix all randomness for reproducible training."""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 def get_parser():
@@ -34,6 +46,11 @@ if __name__ == '__main__':
 
     args = get_parser()
     print("cuda:",torch.cuda.is_available())
+
+    # ---- reproducibility: fixed random seed (default 42, overridable via config) ----
+    seed = getattr(args, 'seed', 42)
+    set_seed(seed)
+    print(f"[seed] fixed random seed = {seed}")
 
     return_attrs = (getattr(args, 'use_aux', False)
                     or getattr(args, 'count_loss_weight', 0) > 0
