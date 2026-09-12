@@ -67,9 +67,9 @@
 | E10 | kw_location | 仅方位关键词(ckpt丢失) | — | 0.8842 | — | |
 | E6 | aux_full | full + 三头辅助损失(ckpt丢失) | — | 0.8919 | — | 未提升 |
 | E7 | aux_location | location + 辅助损失 | 0.9713 | 0.8792 | 0.7844 | 未提升 |
-| C1 | count_full | full + 连通域回归 | — | 0.3641 | 0.2226 | 崩溃 |
-| C2 | count_location | location + 连通域回归 | — | 0.2441 | 0.1390 | 崩溃 |
-| C3 | count_weighted | full + 类加权回归 | — | 0.3356 | 0.2017 | 仍崩 |
+| C1 | count_full | full + 连通域回归 | 0.6510 | 0.3641 | 0.2226 | 崩溃 |
+| C2 | count_location | location + 连通域回归 | 0.2771 | 0.2441 | 0.1390 | 崩溃(count_acc 0.755 虚高) |
+| C3 | count_weighted | full + 类加权回归 | 0.6425 | 0.3356 | 0.2017 | 仍崩 |
 | **C4** | **aux_quantity_weighted** | full + **数量分类头(加权CE)** | 0.9734 | 0.8904 | 0.8025 | count_acc **91.3%**(基线90.7%,+0.6pp) |
 | E11 | aux_nature | full + 性质分类头(加权CE) | 0.9732 | 0.8896 | 0.8011 | count_acc 91.2%(≈C4) |
 | E12 | clip_full | full + CLIP 全局对齐 | 0.9713 | 0.8825 | 0.7897 | count_acc 87.8%(低于基线) |
