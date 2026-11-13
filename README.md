@@ -70,6 +70,10 @@ To train a model, please execute:
 To evaluate a model, please excute:  
 ```python evaluate.py```
 
+**本仓库补充文档（中文）**  
+- 使用说明书：[`USAGE.md`](./USAGE.md)  
+- 实验归档与导师汇报：[`experiments/README.md`](./experiments/README.md)、[`experiments/docs/PROGRESS_REPORT.md`](./experiments/docs/PROGRESS_REPORT.md)
+
 ## Result explain
 Some of you have expressed doubts about the results in *Table 1*, which are different from the std out on the results screen during training.  
 Please note: The results in *Table 1* were obtained on the QaTa-COV19 **test set**. Please run ```evaluate.py``` to obtain the results on the test set instead of referring to the std out on the screen during training, while those results were obtained on the validation set!

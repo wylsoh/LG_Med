@@ -11,6 +11,14 @@ save_model/
 *.pth
 *.ckpt
 
+# 本机运行日志（归档副本在 experiments/local_autodl/）
+lightning_logs/
+log_file/
+
+# 他服拷入的大型日志可按需取消下一行注释再提交文档-only
+# experiments/remote_server/lightning_logs/
+# experiments/remote_server/logs/*.log
+
 # Python
 __pycache__/
 *.py[cod]
@@ -24,3 +32,65 @@ env/
 .idea/
 .vscode/
 .DS_Store
+experiments/README.md
+experiments/docs/EXPERIMENT_SUMMARY.md
+experiments/docs/EXPERIMENTS.md
+experiments/docs/PPT讲解稿.md
+experiments/docs/PROGRESS_REPORT.md
+experiments/docs/REPORT.md
+experiments/docs/进度汇报_压缩前备份.pptx
+experiments/docs/进度汇报_改版前备份.pptx
+experiments/docs/进度汇报_文本信息利用_微调备份.pptx
+experiments/docs/进度汇报_文本信息利用.pptx
+experiments/docs/进度汇报_装饰版备份.pptx
+experiments/local_autodl/NOTES.md
+experiments/remote_server/VERSION_INDEX.md
+experiments/remote_server/code_snapshot/diag_info.txt
+experiments/remote_server/code_snapshot/evaluate.py
+experiments/remote_server/code_snapshot/LICENSE
+experiments/remote_server/code_snapshot/README.md
+experiments/remote_server/code_snapshot/requirements.txt
+experiments/remote_server/code_snapshot/train.py
+experiments/remote_server/logs/caption_features_test.csv
+experiments/remote_server/logs/caption_features_train.csv
+experiments/remote_server/logs/corr_gt.md
+experiments/remote_server/logs/corr_text.md
+experiments/remote_server/logs/desc_stats.md
+experiments/remote_server/logs/eval_count.log
+experiments/remote_server/logs/gt_count_test.csv
+experiments/remote_server/logs/gt_count_train.csv
+experiments/remote_server/logs/text_inputs_kw_location.csv
+experiments/remote_server/logs/text_inputs_kw_nature.csv
+experiments/remote_server/logs/text_inputs_kw_quantity.csv
+experiments/remote_server/logs/train_aux_full.log
+experiments/remote_server/logs/train_aux_location.log
+experiments/remote_server/logs/train_aux_nature.log
+experiments/remote_server/logs/train_aux_quantity_location.log
+experiments/remote_server/logs/train_aux_quantity_multitext.log
+experiments/remote_server/logs/train_aux_quantity_unfreeze.log
+experiments/remote_server/logs/train_aux_quantity_w10.log
+experiments/remote_server/logs/train_aux_quantity_weighted.log
+experiments/remote_server/logs/train_clip_clean_full.log
+experiments/remote_server/logs/train_clip_full.log
+experiments/remote_server/logs/train_count_full.log
+experiments/remote_server/logs/train_count_location.log
+experiments/remote_server/logs/train_count_weighted.log
+experiments/remote_server/logs/train_film_full.log
+experiments/remote_server/logs/train_full_rerun.log
+experiments/remote_server/logs/train_full_seed42.log
+experiments/remote_server/logs/train_full.log
+experiments/remote_server/logs/train_keyword.log
+experiments/remote_server/logs/train_kw_location.log
+experiments/remote_server/logs/train_kw_nature.log
+experiments/remote_server/logs/train_kw_quantity.log
+experiments/remote_server/logs/train_location.log
+experiments/remote_server/logs/train_mix_kw.log
+experiments/remote_server/logs/train_multitext_full.log
+experiments/remote_server/logs/train_nature.log
+experiments/remote_server/logs/train_no_pos_full.log
+experiments/remote_server/logs/train_no_text.log
+experiments/remote_server/logs/train_quantity.log
+experiments/remote_server/logs/train_side_gate_full.log
+experiments/remote_server/logs/train_tanda_full.log
+experiments/remote_server/logs/train_unfreeze_full.log
+lib/convnext-tiny-224/tf_model.h5

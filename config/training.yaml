@@ -21,8 +21,8 @@ MODEL:
   project_dim: 768
 
 DATA:
-  train_csv_path: ./data/QaTa-COV19-v2/prompt/train.csv
-  train_root_path: ./data/QaTa-COV19-v2/Train
+  train_csv_path: ../autodl-tmp/data/QaTa-COV19-v2/prompt/train.csv
+  train_root_path: ../autodl-tmp/data/QaTa-COV19-v2/Train
 
-  test_csv_path: ./data/QaTa-COV19-v2/prompt/test.csv
-  test_root_path: ./data/QaTa-COV19-v2/Test
+  test_csv_path: ../autodl-tmp/data/QaTa-COV19-v2/prompt/test.csv
+  test_root_path: ../autodl-tmp/data/QaTa-COV19-v2/Test
