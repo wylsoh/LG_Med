@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Bilingual speaker notes for SpaCon PPT (~8.5–9 min oral + 3 min Q&A)."""
 
-# Pronunciation key uses stress capitals for ease of reading aloud.
+# Pronunciation: IPA in slashes /.../ (General American).
 # Numbers: spoken English + digits in parentheses.
 
 SLIDE_NOTES = [
@@ -13,7 +13,7 @@ SLIDE_NOTES = [
         "en": (
             "Good morning, everyone. My name is Shiqi Shi, from Wuhan University of Science and Technology. "
             "Today I'll present SpaCon: Spatial Complementary Consistency "
-            "[kom-pluh-MEN-tuh-ree / kuhn-SIS-tuhn-see] "
+            "/ˌkɑːmpləˈmentəri/ /kənˈsɪstənsi/ "
             "for Semi-Supervised Medical Image Segmentation. "
             "This work is co-authored with Zhengshi Chen and Juanjuan He."
         ),
@@ -43,16 +43,16 @@ SLIDE_NOTES = [
         "section": "I · Background",
         "en": (
             "Medical image segmentation is fundamental for diagnosis, surgical planning, "
-            "and quantitative [KWON-tuh-tay-tiv] analysis. Deep learning has improved accuracy, "
-            "but dense pixel-level annotation remains prohibitively [pro-HIB-ih-tiv-lee] expensive "
+            "and quantitative /ˈkwɑːntəˌteɪtɪv/ analysis. Deep learning has improved accuracy, "
+            "but dense pixel-level annotation remains prohibitively /prəˈhɪbɪtɪvli/ expensive "
             "and depends on scarce clinical expertise. Semi-supervised learning is a natural choice: "
             "train with few labeled cases plus many unlabeled ones.\n\n"
-            "Two recent paradigms [PAIR-uh-dymz] work well: cross-image mixing, such as BCP, "
-            "and masked image modeling. But both reduce input integrity [in-TEG-rih-tee]. "
+            "Two recent paradigms /ˈpærədaɪmz/ work well: cross-image mixing, such as BCP, "
+            "and masked image modeling. But both reduce input integrity /ɪnˈteɡrəti/. "
             "Conventional masking discards spatial regions. Cross-image replacement and rigid grid "
-            "boundaries disrupt the semantic [sih-MAN-tik] continuity [kon-tih-NOO-ih-tee] of anatomy "
-            "[uh-NAT-uh-mee]. The open question: can we use unlabeled data while keeping spatial "
-            "completeness and continuous anatomical [an-uh-TOM-ih-kuhl] boundaries?"
+            "boundaries disrupt the semantic /sɪˈmæntɪk/ continuity /ˌkɑːntəˈnuːəti/ of anatomy "
+            "/əˈnætəmi/. The open question: can we use unlabeled data while keeping spatial "
+            "completeness and continuous anatomical /ˌænəˈtɑːmɪkəl/ boundaries?"
         ),
         "zh": (
             "医学图像分割对诊断、手术规划与定量分析很关键。深度学习提升了精度，但像素级标注昂贵，"
@@ -68,7 +68,7 @@ SLIDE_NOTES = [
         "cumulative": "1:52",
         "section": "II · Hypothesis",
         "en": (
-            "Our hypothesis [hy-POTH-uh-sis]: if we use complementary masks to retain complete information—"
+            "Our hypothesis /haɪˈpɑːθəsɪs/: if we use complementary masks to retain complete information—"
             "instead of scrambling or discarding it—we can maximize spatial utilization and get more accurate, "
             "continuous anatomical segmentation. In short: two complementary views teach each other, "
             "yet together they still cover the full image."
@@ -85,9 +85,9 @@ SLIDE_NOTES = [
         "cumulative": "2:37",
         "section": "II · SpaCon / CMC",
         "en": (
-            "This leads to SpaCon. Inspired by masked autoencoders [AW-toh-en-koh-derz], random masks can "
-            "force the model to predict covered regions and produce better pseudo-labels [SOO-doh-lay-buhlz], "
-            "also helping reduce edge artifacts [AR-tih-fakts] in mixing methods like BCP. "
+            "This leads to SpaCon. Inspired by masked autoencoders /ˈɔːtoʊɪnˌkoʊdərz/, random masks can "
+            "force the model to predict covered regions and produce better pseudo-labels /ˈsuːdoʊ ˈleɪbəlz/, "
+            "also helping reduce edge artifacts /ˈɑːrtɪfækts/ in mixing methods like BCP. "
             "But we do not throw pixels away—we use spatial complementary masking.\n\n"
             "In CMC—Complementary Mask Consistency—each unlabeled image is split into two fully complementary "
             "spatial views for mutual pseudo-label supervision. For boundaries, Smooth Complementary Mask, "
@@ -125,13 +125,13 @@ SLIDE_NOTES = [
         "section": "III · Methods",
         "en": (
             "As shown here, SpaCon has two branches sharing one student and one EMA "
-            "[EE-em-AY, Exponential Moving Average] teacher.\n\n"
+            "/ˌiː em ˈeɪ/, Exponential Moving Average, teacher.\n\n"
             "The BCP branch handles macro-level distribution alignment via cross-image mixing. "
             "The CMC branch handles micro-level intra-image refinement with complementary masks. "
             "SCM smooths mask boundaries to cut grid artifacts.\n\n"
             "For CMC: unlabeled images are partitioned into a regular grid to form two complementary views. "
             "Early on, a shared block ratio keeps overlapping context; it then decays linearly to strict "
-            "spatial orthogonality [or-thog-uh-NAL-ih-tee]—from about zero point four (0.4) down to zero (0) "
+            "spatial orthogonality /ˌɔːrθɑːɡəˈnæləti/—from about zero point four (0.4) down to zero (0) "
             "over the first five thousand (5,000) steps. "
             "A bidirectional blind-spot mechanism lets each view supervise the invisible pixels of its "
             "complement. We apply stop-gradient to avoid collapse."
@@ -152,9 +152,9 @@ SLIDE_NOTES = [
         "en": (
             "SCM in three steps. Motivation: hard binary masks jump from zero (0) to one (1) at grid edges, "
             "so boundary pixels belong to only one view—along a stripe that is not an anatomical boundary.\n\n"
-            "Pipeline: we replace nearest-neighbor upsampling with bilinear [by-LIN-ee-er] interpolation "
-            "[in-tur-puh-LAY-shun] plus average pooling, forming a continuous transition zone. "
-            "With sigma [SIG-muh] equal to zero point three (0.3) and block size eight (8), "
+            "Pipeline: we replace nearest-neighbor upsampling with bilinear /baɪˈlɪniər/ interpolation "
+            "/ɪnˌtɜːrpəˈleɪʃən/ plus average pooling, forming a continuous transition zone. "
+            "With sigma /ˈsɪɡmə/ equal to zero point three (0.3) and block size eight (8), "
             "the soft band is about one to two (1–2) pixels wide.\n\n"
             "Outcome: boundary pixels receive soft supervision from both views, encouraging consistent anatomy."
         ),
@@ -172,10 +172,10 @@ SLIDE_NOTES = [
         "cumulative": "5:47",
         "section": "IV · ACDC",
         "en": (
-            "On ACDC [AY-see-dee-see] with seven (7) labeled cases—about ten percent (10%) annotation—"
+            "On ACDC /ˌeɪ siː diː ˈsiː/ with seven (7) labeled cases—about ten percent (10%) annotation—"
             "SpaCon reaches Dice ninety point three one percent (90.31%), "
-            "HD95 [aitch-dee-ninety-five] one point three two millimeters (1.32 mm), "
-            "and ASD [AY-ess-dee] zero point four six millimeters (0.46 mm). "
+            "HD95 /ˌeɪtʃ ˈdiː ˈnaɪnti faɪv/ one point three two millimeters (1.32 mm), "
+            "and ASD /ˌeɪ es ˈdiː/ zero point four six millimeters (0.46 mm). "
             "Versus our reproduced BCP baseline: about plus one point two (1.2) Dice points, "
             "and minus one point seven three millimeters (1.73 mm) in HD95.\n\n"
             "With only three (3) labeled cases, we still get Dice eighty-nine point three three percent (89.33%) "
@@ -199,9 +199,9 @@ SLIDE_NOTES = [
         "cumulative": "6:22",
         "section": "IV · Qualitative",
         "en": (
-            "Qualitatively [KWOL-ih-tay-tiv-lee], on ACDC SpaCon yields sharper boundaries than "
+            "Qualitatively /ˈkwɑːləˌteɪtɪvli/, on ACDC SpaCon yields sharper boundaries than "
             "MT, MC-Net, UA-MT, and BCP—consistent with the one point seven three millimeter (1.73 mm) HD95 gain.\n\n"
-            "On the left-atrium [AY-tree-uhm] LA dataset with eight (8) labeled cases, "
+            "On the left-atrium /ˈeɪtriəm/ LA dataset with eight (8) labeled cases, "
             "boundaries are more continuous: about zero point six nine millimeters (0.69 mm) better HD95, "
             "and Dice ninety point three zero percent (90.30%). "
             "Gains transfer from two-D (2D) cardiac MRI to three-D (3D) left-atrium segmentation."
@@ -218,12 +218,12 @@ SLIDE_NOTES = [
         "cumulative": "7:12",
         "section": "IV · Ablation",
         "en": (
-            "On NIH Pancreas [PAN-kree-us] CT with ten percent (10%) labels, "
+            "On NIH Pancreas /ˈpæŋkriəs/ CT with ten percent (10%) labels, "
             "Dice reaches eighty-two point five four percent (82.54%)—"
             "three (3) points above the reproduced baseline. "
             "The larger gain at ten percent (10%) than at twenty percent (20%) again shows "
             "intra-image self-supervision helps most when labels are limited.\n\n"
-            "Ablation [uh-BLAY-shun] on ACDC with seven (7) cases: "
+            "Ablation /əˈbleɪʃən/ on ACDC with seven (7) cases: "
             "BCP alone gives Dice eighty-nine point one one (89.11) and HD95 three point zero five (3.05). "
             "CMC alone can raise Dice but worsen HD95. BCP plus hard-mask CMC helps Dice, yet boundaries stay weak. "
             "Adding SCM reaches Dice ninety point three one (90.31) and HD95 one point three two (1.32). "
@@ -265,8 +265,8 @@ SLIDE_NOTES = [
         "en": (
             "Next: uncertainty-guided adaptive boundary sampling to reduce baseline dependence; "
             "anatomy-aware transition widths matched to local edge sharpness; "
-            "and cross-slice continuity regularization [REG-yuh-luh-ri-ZAY-shun] "
-            "for fuller three-D (3D) volumetric [vol-yuh-MET-rik] scans."
+            "and cross-slice continuity regularization /ˌreɡjələraɪˈzeɪʃən/ "
+            "for fuller three-D (3D) volumetric /ˌvɑːljəˈmetrɪk/ scans."
         ),
         "zh": (
             "下一步：不确定性引导的自适应边界采样；解剖感知过渡宽度；"
@@ -293,7 +293,7 @@ def format_notes(item: dict) -> str:
         f"【时长 Timing】{item['timing']}  |  【累计 Cumulative】{item['cumulative']}  |  {item['section']}\n"
         f"{'=' * 56}\n"
         f"【English — speak this】\n"
-        f"（生僻词发音见方括号；数字读法见括号内英文）\n"
+        f"（生僻词音标见 /IPA/；数字读法见括号内英文）\n"
         f"{item['en']}\n"
         f"\n"
         f"{'-' * 56}\n"

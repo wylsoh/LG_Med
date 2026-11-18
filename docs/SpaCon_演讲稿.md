@@ -1,10 +1,10 @@
 # SpaCon Oral Script（中英双语 · 精简版）· PRICAI-2026
 
 > **会议时长**：13 min presentation + 3 min Q&A  
-> **本口播目标**：**约 8:20**（略短于 10 分钟，便于控时）  
+> **本口播目标**：**约 8:20**  
 > **PPT**：`presentations/SpaCon_Presentation.pptx`（备注已同步）  
-> **读法约定**：英文主稿；方括号 `[...]` 为生僻词发音；数字旁括号为英文读法  
-> **已删除**：开场预计时长说明；“即插即用 / plug-and-play”；“零参数 / no learnable parameters”类表述
+> **读法约定**：英文主稿；`/IPA/` 为国际音标（General American）；数字旁括号为英文读法  
+> **已删除**：开场预计时长；即插即用 / 零参数类表述
 
 ---
 
@@ -30,40 +30,45 @@
 
 ---
 
-## 发音速查（按出现顺序）
+## 音标速查（IPA）
 
-| Word | Pronunciation |
-|------|---------------|
-| complementary | `kom-pluh-MEN-tuh-ree` |
-| consistency | `kuhn-SIS-tuhn-see` |
-| quantitative | `KWON-tuh-tay-tiv` |
-| prohibitively | `pro-HIB-ih-tiv-lee` |
-| paradigms | `PAIR-uh-dymz` |
-| integrity | `in-TEG-rih-tee` |
-| semantic | `sih-MAN-tik` |
-| continuity | `kon-tih-NOO-ih-tee` |
-| anatomy / anatomical | `uh-NAT-uh-mee / an-uh-TOM-ih-kuhl` |
-| hypothesis | `hy-POTH-uh-sis` |
-| autoencoders | `AW-toh-en-koh-derz` |
-| pseudo-labels | `SOO-doh-lay-buhlz` |
-| artifacts | `AR-tih-fakts` |
-| orthogonality | `or-thog-uh-NAL-ih-tee` |
-| bilinear | `by-LIN-ee-er` |
-| interpolation | `in-tur-puh-LAY-shun` |
-| sigma | `SIG-muh` |
-| qualitatively | `KWOL-ih-tay-tiv-lee` |
-| atrium | `AY-tree-uhm` |
-| pancreas | `PAN-kree-us` |
-| ablation | `uh-BLAY-shun` |
-| regularization | `REG-yuh-luh-ri-ZAY-shun` |
-| volumetric | `vol-yuh-MET-rik` |
+| Word | IPA |
+|------|-----|
+| complementary | `/ˌkɑːmpləˈmentəri/` |
+| consistency | `/kənˈsɪstənsi/` |
+| quantitative | `/ˈkwɑːntəˌteɪtɪv/` |
+| prohibitively | `/prəˈhɪbɪtɪvli/` |
+| paradigms | `/ˈpærədaɪmz/` |
+| integrity | `/ɪnˈteɡrəti/` |
+| semantic | `/sɪˈmæntɪk/` |
+| continuity | `/ˌkɑːntəˈnuːəti/` |
+| anatomy | `/əˈnætəmi/` |
+| anatomical | `/ˌænəˈtɑːmɪkəl/` |
+| hypothesis | `/haɪˈpɑːθəsɪs/` |
+| autoencoders | `/ˈɔːtoʊɪnˌkoʊdərz/` |
+| pseudo-labels | `/ˈsuːdoʊ ˈleɪbəlz/` |
+| artifacts | `/ˈɑːrtɪfækts/` |
+| EMA | `/ˌiː em ˈeɪ/` |
+| orthogonality | `/ˌɔːrθɑːɡəˈnæləti/` |
+| bilinear | `/baɪˈlɪniər/` |
+| interpolation | `/ɪnˌtɜːrpəˈleɪʃən/` |
+| sigma | `/ˈsɪɡmə/` |
+| ACDC | `/ˌeɪ siː diː ˈsiː/` |
+| HD95 | `/ˌeɪtʃ ˈdiː ˈnaɪnti faɪv/` |
+| ASD | `/ˌeɪ es ˈdiː/` |
+| qualitatively | `/ˈkwɑːləˌteɪtɪvli/` |
+| atrium | `/ˈeɪtriəm/` |
+| pancreas | `/ˈpæŋkriəs/` |
+| ablation | `/əˈbleɪʃən/` |
+| regularization | `/ˌreɡjələraɪˈzeɪʃən/` |
+| volumetric | `/ˌvɑːljəˈmetrɪk/` |
 
 ---
 
 ## Slide 1 · Opening（~15s｜累计 0:15）
 
 **English**  
-Good morning, everyone. My name is Shiqi Shi, from Wuhan University of Science and Technology. Today I'll present SpaCon: Spatial Complementary Consistency [kom-pluh-MEN-tuh-ree / kuhn-SIS-tuhn-see] for Semi-Supervised Medical Image Segmentation. This work is co-authored with Zhengshi Chen and Juanjuan He.
+Good morning, everyone. My name is Shiqi Shi, from Wuhan University of Science and Technology. Today I'll present SpaCon: Spatial Complementary Consistency /ˌkɑːmpləˈmentəri/ /kənˈsɪstənsi/ for Semi-Supervised Medical Image Segmentation. This work is co-authored with Zhengshi Chen and Juanjuan He.
 
 **中文**  
 各位老师、各位同学，早上好。我是武汉科技大学的石诗淇。今天汇报 SpaCon：面向半监督医学图像分割的空间互补一致性方法。本工作由我和陈郑石、何娟娟老师共同完成。
@@ -83,9 +88,9 @@ Here is today's roadmap: research background, hypothesis and objectives, methodo
 ## Slide 3 · I · Background（~55s｜累计 1:22）
 
 **English**  
-Medical image segmentation is fundamental for diagnosis, surgical planning, and quantitative [KWON-tuh-tay-tiv] analysis. Deep learning has improved accuracy, but dense pixel-level annotation remains prohibitively [pro-HIB-ih-tiv-lee] expensive and depends on scarce clinical expertise. Semi-supervised learning is a natural choice: train with few labeled cases plus many unlabeled ones.
+Medical image segmentation is fundamental for diagnosis, surgical planning, and quantitative /ˈkwɑːntəˌteɪtɪv/ analysis. Deep learning has improved accuracy, but dense pixel-level annotation remains prohibitively /prəˈhɪbɪtɪvli/ expensive and depends on scarce clinical expertise. Semi-supervised learning is a natural choice: train with few labeled cases plus many unlabeled ones.
 
-Two recent paradigms [PAIR-uh-dymz] work well: cross-image mixing, such as BCP, and masked image modeling. But both reduce input integrity [in-TEG-rih-tee]. Conventional masking discards spatial regions. Cross-image replacement and rigid grid boundaries disrupt the semantic [sih-MAN-tik] continuity [kon-tih-NOO-ih-tee] of anatomy [uh-NAT-uh-mee]. The open question: can we use unlabeled data while keeping spatial completeness and continuous anatomical [an-uh-TOM-ih-kuhl] boundaries?
+Two recent paradigms /ˈpærədaɪmz/ work well: cross-image mixing, such as BCP, and masked image modeling. But both reduce input integrity /ɪnˈteɡrəti/. Conventional masking discards spatial regions. Cross-image replacement and rigid grid boundaries disrupt the semantic /sɪˈmæntɪk/ continuity /ˌkɑːntəˈnuːəti/ of anatomy /əˈnætəmi/. The open question: can we use unlabeled data while keeping spatial completeness and continuous anatomical /ˌænəˈtɑːmɪkəl/ boundaries?
 
 **中文**  
 医学图像分割对诊断、手术规划与定量分析很关键。深度学习提升了精度，但像素级标注昂贵，且依赖稀缺专科经验。半监督因此很自然：少量有标签加大量无标签一起训练。
@@ -97,7 +102,7 @@ Two recent paradigms [PAIR-uh-dymz] work well: cross-image mixing, such as BCP, 
 ## Slide 4 · II · Hypothesis（~30s｜累计 1:52）
 
 **English**  
-Our hypothesis [hy-POTH-uh-sis]: if we use complementary masks to retain complete information—instead of scrambling or discarding it—we can maximize spatial utilization and get more accurate, continuous anatomical segmentation. In short: two complementary views teach each other, yet together they still cover the full image.
+Our hypothesis /haɪˈpɑːθəsɪs/: if we use complementary masks to retain complete information—instead of scrambling or discarding it—we can maximize spatial utilization and get more accurate, continuous anatomical segmentation. In short: two complementary views teach each other, yet together they still cover the full image.
 
 **中文**  
 我们的假设：用互补掩码保留完整信息，而不是打乱或丢弃，就能更好利用空间信息，得到更准确、更连续的解剖分割。一句话：两路互补视图互相教学，合起来仍覆盖整图。
@@ -107,7 +112,7 @@ Our hypothesis [hy-POTH-uh-sis]: if we use complementary masks to retain complet
 ## Slide 5 · II · SpaCon / CMC（~45s｜累计 2:37）
 
 **English**  
-This leads to SpaCon. Inspired by masked autoencoders [AW-toh-en-koh-derz], random masks can force the model to predict covered regions and produce better pseudo-labels [SOO-doh-lay-buhlz], also helping reduce edge artifacts [AR-tih-fakts] in mixing methods like BCP. But we do not throw pixels away—we use spatial complementary masking.
+This leads to SpaCon. Inspired by masked autoencoders /ˈɔːtoʊɪnˌkoʊdərz/, random masks can force the model to predict covered regions and produce better pseudo-labels /ˈsuːdoʊ ˈleɪbəlz/, also helping reduce edge artifacts /ˈɑːrtɪfækts/ in mixing methods like BCP. But we do not throw pixels away—we use spatial complementary masking.
 
 In CMC—Complementary Mask Consistency—each unlabeled image is split into two fully complementary spatial views for mutual pseudo-label supervision. For boundaries, Smooth Complementary Mask, or SCM, creates a transition zone so boundary pixels get weighted supervision from both views.
 
@@ -131,11 +136,11 @@ We set three objectives. First, propose SpaCon as a lightweight local refinement
 ## Slide 7 · III · Methods（~70s｜累计 4:17）
 
 **English**  
-As shown here, SpaCon has two branches sharing one student and one EMA [EE-em-AY, Exponential Moving Average] teacher.
+As shown here, SpaCon has two branches sharing one student and one EMA /ˌiː em ˈeɪ/, Exponential Moving Average, teacher.
 
 The BCP branch handles macro-level distribution alignment via cross-image mixing. The CMC branch handles micro-level intra-image refinement with complementary masks. SCM smooths mask boundaries to cut grid artifacts.
 
-For CMC: unlabeled images are partitioned into a regular grid to form two complementary views. Early on, a shared block ratio keeps overlapping context; it then decays linearly to strict spatial orthogonality [or-thog-uh-NAL-ih-tee]—from about zero point four (0.4) down to zero (0) over the first five thousand (5,000) steps. A bidirectional blind-spot mechanism lets each view supervise the invisible pixels of its complement. We apply stop-gradient to avoid collapse.
+For CMC: unlabeled images are partitioned into a regular grid to form two complementary views. Early on, a shared block ratio keeps overlapping context; it then decays linearly to strict spatial orthogonality /ˌɔːrθɑːɡəˈnæləti/—from about zero point four (0.4) down to zero (0) over the first five thousand (5,000) steps. A bidirectional blind-spot mechanism lets each view supervise the invisible pixels of its complement. We apply stop-gradient to avoid collapse.
 
 **中文**  
 如图，SpaCon 两条分支共用学生网络与 EMA（指数滑动平均）教师。
@@ -151,7 +156,7 @@ CMC：无标签图按网格分成两个互补视图。训练早期共享块比�
 **English**  
 SCM in three steps. Motivation: hard binary masks jump from zero (0) to one (1) at grid edges, so boundary pixels belong to only one view—along a stripe that is not an anatomical boundary.
 
-Pipeline: we replace nearest-neighbor upsampling with bilinear [by-LIN-ee-er] interpolation [in-tur-puh-LAY-shun] plus average pooling, forming a continuous transition zone. With sigma [SIG-muh] equal to zero point three (0.3) and block size eight (8), the soft band is about one to two (1–2) pixels wide.
+Pipeline: we replace nearest-neighbor upsampling with bilinear /baɪˈlɪniər/ interpolation /ɪnˌtɜːrpəˈleɪʃən/ plus average pooling, forming a continuous transition zone. With sigma /ˈsɪɡmə/ equal to zero point three (0.3) and block size eight (8), the soft band is about one to two (1–2) pixels wide.
 
 Outcome: boundary pixels receive soft supervision from both views, encouraging consistent anatomy.
 
@@ -167,7 +172,7 @@ SCM 分三步。动机：硬掩码在网格边从 zero（0）跳到 one（1）�
 ## Slide 9 · IV · ACDC（~45s｜累计 5:47）
 
 **English**  
-On ACDC [AY-see-dee-see] with seven (7) labeled cases—about ten percent (10%) annotation—SpaCon reaches Dice ninety point three one percent (90.31%), HD95 [aitch-dee-ninety-five] one point three two millimeters (1.32 mm), and ASD [AY-ess-dee] zero point four six millimeters (0.46 mm). Versus our reproduced BCP baseline: about plus one point two (1.2) Dice points, and minus one point seven three millimeters (1.73 mm) in HD95.
+On ACDC /ˌeɪ siː diː ˈsiː/ with seven (7) labeled cases—about ten percent (10%) annotation—SpaCon reaches Dice ninety point three one percent (90.31%), HD95 /ˌeɪtʃ ˈdiː ˈnaɪnti faɪv/ one point three two millimeters (1.32 mm), and ASD /ˌeɪ es ˈdiː/ zero point four six millimeters (0.46 mm). Versus our reproduced BCP baseline: about plus one point two (1.2) Dice points, and minus one point seven three millimeters (1.73 mm) in HD95.
 
 With only three (3) labeled cases, we still get Dice eighty-nine point three three percent (89.33%) and HD95 one point three seven millimeters (1.37 mm)—a two point eight three (2.83) point gain, nearly matching the seven-case setting. So when labels are scarce, intra-image complementary supervision helps even more.
 
@@ -181,9 +186,9 @@ ACDC、seven（7）例有标签（约 ten percent / 10%）下，SpaCon 达到 Di
 ## Slide 10 · IV · Qualitative（~35s｜累计 6:22）
 
 **English**  
-Qualitatively [KWOL-ih-tay-tiv-lee], on ACDC SpaCon yields sharper boundaries than MT, MC-Net, UA-MT, and BCP—consistent with the one point seven three millimeter (1.73 mm) HD95 gain.
+Qualitatively /ˈkwɑːləˌteɪtɪvli/, on ACDC SpaCon yields sharper boundaries than MT, MC-Net, UA-MT, and BCP—consistent with the one point seven three millimeter (1.73 mm) HD95 gain.
 
-On the left-atrium [AY-tree-uhm] LA dataset with eight (8) labeled cases, boundaries are more continuous: about zero point six nine millimeters (0.69 mm) better HD95, and Dice ninety point three zero percent (90.30%). Gains transfer from two-D (2D) cardiac MRI to three-D (3D) left-atrium segmentation.
+On the left-atrium /ˈeɪtriəm/ LA dataset with eight (8) labeled cases, boundaries are more continuous: about zero point six nine millimeters (0.69 mm) better HD95, and Dice ninety point three zero percent (90.30%). Gains transfer from two-D (2D) cardiac MRI to three-D (3D) left-atrium segmentation.
 
 **中文**  
 定性上，ACDC 中 SpaCon 边界更锐，对应 HD95 改善 one point seven three mm（1.73 mm）。
@@ -195,9 +200,9 @@ On the left-atrium [AY-tree-uhm] LA dataset with eight (8) labeled cases, bounda
 ## Slide 11 · IV · Ablation（~50s｜累计 7:12）
 
 **English**  
-On NIH Pancreas [PAN-kree-us] CT with ten percent (10%) labels, Dice reaches eighty-two point five four percent (82.54%)—three (3) points above the reproduced baseline. The larger gain at ten percent (10%) than at twenty percent (20%) again shows intra-image self-supervision helps most when labels are limited.
+On NIH Pancreas /ˈpæŋkriəs/ CT with ten percent (10%) labels, Dice reaches eighty-two point five four percent (82.54%)—three (3) points above the reproduced baseline. The larger gain at ten percent (10%) than at twenty percent (20%) again shows intra-image self-supervision helps most when labels are limited.
 
-Ablation [uh-BLAY-shun] on ACDC with seven (7) cases: BCP alone gives Dice eighty-nine point one one (89.11) and HD95 three point zero five (3.05). CMC alone can raise Dice but worsen HD95. BCP plus hard-mask CMC helps Dice, yet boundaries stay weak. Adding SCM reaches Dice ninety point three one (90.31) and HD95 one point three two (1.32). So: BCP aligns distributions, CMC refines inside the image, SCM cleans boundary artifacts.
+Ablation /əˈbleɪʃən/ on ACDC with seven (7) cases: BCP alone gives Dice eighty-nine point one one (89.11) and HD95 three point zero five (3.05). CMC alone can raise Dice but worsen HD95. BCP plus hard-mask CMC helps Dice, yet boundaries stay weak. Adding SCM reaches Dice ninety point three one (90.31) and HD95 one point three two (1.32). So: BCP aligns distributions, CMC refines inside the image, SCM cleans boundary artifacts.
 
 **中文**  
 Pancreas CT、ten percent（10%）标注下 Dice eighty-two point five four percent（82.54%），相对复现基线 +three（3）个百分点；ten percent（10%）收益大于 twenty percent（20%）。
@@ -223,7 +228,7 @@ SpaCon 说明：微观图内监督可补上宏观跨图对齐，边界更锐、�
 ## Slide 13 · V · Future（~25s｜累计 8:07）
 
 **English**  
-Next: uncertainty-guided adaptive boundary sampling to reduce baseline dependence; anatomy-aware transition widths matched to local edge sharpness; and cross-slice continuity regularization [REG-yuh-luh-ri-ZAY-shun] for fuller three-D (3D) volumetric [vol-yuh-MET-rik] scans.
+Next: uncertainty-guided adaptive boundary sampling to reduce baseline dependence; anatomy-aware transition widths matched to local edge sharpness; and cross-slice continuity regularization /ˌreɡjələraɪˈzeɪʃən/ for fuller three-D (3D) volumetric /ˌvɑːljəˈmetrɪk/ scans.
 
 **中文**  
 下一步：不确定性引导的自适应边界采样；解剖感知过渡宽度；以及跨切片连续性约束，更好适配 3D 体数据。
@@ -246,7 +251,7 @@ Thank you for your attention. Our code is on GitHub, and I'm happy to take quest
 We do not discard pixels. Complementary masks cover the full image together; each view teaches the other's blind spot, with stop-gradient to prevent collapse.
 
 **Q2: Why couple CMC with BCP?**  
-Ablation [uh-BLAY-shun]: CMC alone can raise Dice but hurt HD95. BCP gives the macro prior; CMC refines locally.
+Ablation /əˈbleɪʃən/: CMC alone can raise Dice but hurt HD95. BCP gives the macro prior; CMC refines locally.
 
 **Q3: Why sigma = zero point three (0.3)?**  
 Too small ≈ hard boundary; too large dilutes complementarity. σ=0.3 / s=8 gave best HD95 one point three two millimeters (1.32 mm) on ACDC.
