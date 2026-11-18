@@ -1,237 +1,245 @@
-# SpaCon 会议演讲稿（PRICAI-2026）
-
-> 对应 PPT：`SpaCon_Presentation.pptx`（14 页）  
-> 对应论文：SpaCon: Spatial Complementary Consistency for Semi-Supervised Medical Image Segmentation  
-> 建议总时长：**10–12 分钟**（含提问预留）  
-> 语速提示：约 160–180 字/分钟；括号内为可选补充或指图提示，可按现场时间删减。
-
----
-
-## 开场节奏建议
-
-| 部分 | 页码 | 建议时长 |
-|------|------|----------|
-| 封面 + 目录 | 1–2 | 40 秒 |
-| 背景与假设 | 3–4 | 1.5 分钟 |
-| 创新与目标 | 5–6 | 1.5 分钟 |
-| 方法 | 7–8 | 3 分钟 |
-| 实验与结果 | 9–11 | 3 分钟 |
-| 讨论、展望与致谢 | 12–14 | 1.5 分钟 |
+# SpaCon Oral Script（中英双语）· PRICAI-2026
+> **会议时长**：13 min presentation + 3 min Q&A  
+> **本口播目标**：**约 10:00**（预留约 3 分钟缓冲）  
+> **PPT**：`presentations/SpaCon_Presentation.pptx`（每页备注已写入同内容）  
+> **上台主读**：English；中文供对照
 
 ---
 
-## 第 1 页｜封面
+## 时长分配总表
 
-各位老师、各位同学，大家好。
+| 页 | 内容 | 本页 | 累计 |
+|----|------|------|------|
+| 1 | Title / 封面 | ~20s | 0:20 |
+| 2 | Agenda / 目录 | ~15s | 0:35 |
+| 3 | Background / 背景 | ~65s | 1:40 |
+| 4 | Hypothesis / 假设 | ~35s | 2:15 |
+| 5 | SpaCon & CMC | ~50s | 3:05 |
+| 6 | Objectives / 目标 | ~40s | 3:45 |
+| 7 | Methods / 方法总览 | ~85s | 5:10 |
+| 8 | SCM design | ~55s | 6:05 |
+| 9 | ACDC results | ~50s | 6:55 |
+| 10 | Qualitative / LA | ~45s | 7:40 |
+| 11 | Pancreas + ablation | ~55s | 8:35 |
+| 12 | Discussion | ~40s | 9:15 |
+| 13 | Future | ~30s | 9:45 |
+| 14 | Thank you | ~15s | 10:00 |
+| — | Q&A / 答辩 | **3:00** | 13:00 slot |
 
-我是来自武汉科技大学计算机科学与技术学院的石诗淇。今天很荣幸能在 PRICAI-2026 上，和大家分享我们的工作——**SpaCon：面向半监督医学图像分割的空间互补一致性方法**。
-
-本工作由我、陈郑石和何娟娟老师共同完成。接下来，我会用大约十分钟时间，介绍我们为什么要做这件事、怎么做，以及实验上取得了怎样的结果。
-
----
-
-## 第 2 页｜目录
-
-今天的汇报分为五个部分。
-
-首先是研究背景，说明现有半监督分割方法还存在哪些痛点；  
-第二，提出我们的核心假设和研究目标；  
-第三，展开介绍 SpaCon 的方法设计；  
-第四，展示在多个公开数据集上的实验结果；  
-最后是讨论、局限，以及下一步工作。
-
----
-
-## 第 3 页｜研究背景：分割面临的挑战
-
-我们先从问题本身说起。
-
-医学图像分割是临床诊断、手术规划和定量分析里非常基础的一项任务。深度学习，尤其是 U-Net 这类结构，已经把分割精度推得很高。但真正落地时，大家都会碰到同一个瓶颈——**像素级标注成本极高**，而且高度依赖稀缺的专科医生经验。所以，半监督学习成了一个很自然的选择：用少量有标签数据，加上大量无标签数据，一起训练。
-
-近两年，半监督医学分割里有两条很有代表性的路线。一条是以 BCP、ABD 为代表的**跨图像混合**；另一条是以 UniMatch 为代表的**掩码图像建模**。它们整体效果不错，但都会在不同程度上削弱输入数据的完整性。
-
-具体来说，有三个问题值得注意。
-
-第一，**标注成本高**。这一点大家都清楚，也是半监督方法存在的根本动机。
-
-第二，**信息完整性损失**。传统掩码建模会主动丢掉一部分像素区域；跨图像混合虽然能对齐分布，但会把不同样本的区域硬拼在一起。无论哪种，都会让模型看到的输入不再“完整”。
-
-第三，**语义连续性被打断**。常规掩码会丢掉关键空间信息；跨图像替换，以及硬网格边界，都会把解剖结构本来连贯的语义切碎。尤其是网格块边缘那种“非解剖边界”的断裂，会直接影响细粒度结构建模。
-
-所以我们真正想解决的，是：**能不能在利用无标签数据的同时，既保住空间信息的完整性，又保住解剖边界的语义连续性？**
+**若超时可压缩**：第 2 页一句话带过；第 6 页只念三条标题；第 13 页只念三点关键词。
 
 ---
 
-## 第 4 页｜可验证的核心假设
+## Slide 1 · Opening（~20s｜累计 0:20）
 
-基于前面的观察，我们提出一个可以直接验证的假设：
+**English**  
+Good morning, everyone. My name is Shiqi Shi, from Wuhan University of Science and Technology. It's my pleasure to present our work, SpaCon: Spatial Complementary Consistency for Semi-Supervised Medical Image Segmentation. This work is co-authored with Zhengshi Chen and Juanjuan He. I'll keep the talk to about ten minutes, and then we can move to Q&A.
 
-如果我们不用“打乱信息”的方式做扰动，而是用**互补掩码**，让两路视图合起来仍然覆盖整张图、信息不丢，那么模型就能更充分地利用空间上下文，从而得到**更准确、更连续**的解剖分割结果。
-
-一句话概括：不是扔掉一部分再猜，而是**分两边看、互相教，合起来仍然是完整的一张图**。
-
----
-
-## 第 5 页｜核心创新：SpaCon 与 CMC
-
-沿着这个思路，我们提出了 SpaCon 框架。
-
-灵感来自 MAE 一类的掩码建模：随机遮挡可以逼模型去预测被盖住的区域，从而产生更高质量的伪标签，也能缓解像 BCP 这类方法里常见的边缘伪影和空间利用不足的问题。但我们不想丢掉像素，所以进一步提出了**空间互补掩码**。
-
-它的核心模块叫 **CMC，也就是 Complementary Mask Consistency**。具体做法是：把无标签图像划分成两个空间上完全互补的视图，送进学生网络，让它们做**双向伪标签互监督**。一边看得见的地方，去教另一边看不见的地方；两边合起来，整张图的信息都还在。
-
-同时，为了改善边界处理，我们设计了 **SCM，即平滑互补掩码**。它在网格块边缘造出一段连续的过渡带，让边界像素同时接受来自两个互补视图的加权监督，而不是被硬切成“只属于某一边”。
+**中文**  
+各位老师、各位同学，早上好。我是武汉科技大学的石诗淇。今天很荣幸汇报我们的工作 SpaCon：面向半监督医学图像分割的空间互补一致性方法。本工作由我和陈郑石、何娟娟老师共同完成。讲解大约十分钟，随后进入答辩环节。
 
 ---
 
-## 第 6 页｜研究目标
+## Slide 2 · Agenda（~15s｜累计 0:35）
 
-围绕这个想法，我们设定了三个明确目标。
+**English**  
+Here is the roadmap for today. I'll briefly cover the research background, then our hypothesis and objectives, the SpaCon methodology, the main experimental results, and finally discussion with next steps.
 
-第一，提出 **SpaCon 框架**：做一个轻量的局部精炼模块，把宏观上的跨图像混合，和微观上的结构完整性连接起来。它不额外增加可学习参数，可以看作在现有基线之上的即插即用增强。
-
-第二，引入 **CMC 分支**：用双向盲区机制保留全部像素特征，让互补区域互相教学，从根上避免传统掩码“丢掉一块再重建”造成的空间信息损失。
-
-第三，设计 **SCM 算法**：用连续取值的过渡带，替换硬的二值网格划分，平滑梯度、消除网格伪影，让解剖边界更连贯。
+**中文**  
+今天的路线如下：研究背景、假设与目标、SpaCon 方法、主要实验结果，以及讨论与下一步工作。
 
 ---
 
-## 第 7 页｜方法总览：研究设计
+## Slide 3 · I · Background（~65s｜累计 1:40）
 
-接下来进入方法部分。大家可以看这张总览图。
+**English**  
+Let me start with the problem. Medical image segmentation is a fundamental task for clinical diagnosis, surgical planning, and quantitative analysis. Deep learning, especially U-Net style architectures, has significantly improved segmentation accuracy. However, dense pixel-level annotation remains prohibitively expensive and heavily relies on scarce domain expertise. Semi-supervised learning is therefore a natural solution: we jointly use a small labeled set and a large unlabeled set to reduce annotation cost.
 
-整体上，SpaCon 有两条并行的分支，共用同一个学生网络，以及同一个 EMA 教师网络。
+Among recent advances, two paradigms stand out. One is cross-image mixing, represented by methods such as BCP. The other is masked image modeling. Both improve overall performance, but they also reduce the integrity of the input. Conventional masking discards vital spatial regions. Cross-image region replacement, together with rigid grid boundaries, disrupts the semantic continuity of anatomical structures. So the open challenge is clear: can we exploit unlabeled data while preserving spatial completeness and continuous anatomical boundaries?
 
-左边是 **BCP 分支**，负责宏观层面：通过跨图像双向 copy-paste，对齐有标签和无标签数据的经验分布。  
-右边是 **CMC 分支**，负责微观层面：在单张图像内部做互补掩码，做局部结构精炼。  
-其中的 **SCM**，则专门处理边界平滑，削弱网格伪影。
+**中文**  
+先从问题说起。医学图像分割是临床诊断、手术规划和定量分析的基础任务。深度学习，尤其是 U-Net，显著提升了精度，但像素级标注昂贵，且高度依赖稀缺专科经验。半监督因此很自然：少量有标签加大量无标签一起训练。
 
-方法流程可以概括成四步。
-
-**第一步，掩码生成。** 把无标签图像按规则网格划分，生成两个空间互补视图。
-
-**第二步，互补课程学习。** 训练早期，两个掩码会共享一部分块，让每路视图都还有足够上下文；随着训练推进，共享比例线性衰减，最终收敛到严格的空间正交——一边一半，互不重叠。论文里这个共享比例从 0.4 线性衰减到 0，大约在前 5000 步完成。
-
-**第三步，互教学。** 利用双向盲区机制，每一路视图去监督互补区域里自己看不见的像素，从而把整图的全局上下文用起来。这里我们还会加 stop-gradient，避免两路塌缩成完全相同的输出。
-
-**第四步，联合优化。** 两条分支的监督信号相对独立，但都通过统一的 EMA 教师来优化。总损失是 BCP 损失，加上带 warm-up 的 CMC 损失，保证伪标签质量稳定后再逐步加大互补一致性的权重。
+近年两条路线很有代表性：跨图像混合（如 BCP）和掩码图像建模。它们提升了整体性能，却削弱了输入完整性——传统掩码丢掉关键空间区域；跨图像替换加上硬网格边界，会打断解剖结构的语义连续性。核心挑战是：利用无标签数据时，能否同时保住空间完整性与连续的解剖边界？
 
 ---
 
-## 第 8 页｜进阶设计：SCM
+## Slide 4 · II · Hypothesis（~35s｜累计 2:15）
 
-这一页专门讲 SCM，也就是平滑互补掩码。可以分成“动机—流程—结果”三步来理解。
+**English**  
+This leads to our testable claim. We hypothesize that by using complementary masks to retain complete information—instead of scrambling or discarding it—we can maximize spatial information utilization and achieve significantly more accurate and continuous anatomical segmentation. In one sentence: we split each unlabeled image into two complementary views that teach each other, yet together they still cover the full image with no pixel loss.
 
-**动机：** 硬二值掩码在网格块边缘会从 0 直接跳到 1。边界像素只能分给一边，另一边完全拿不到梯度。这条断裂线其实并不对应任何真实解剖边界，却会系统性打断监督信号。
-
-**流程：** SCM 不再用最近邻上采样，而是先双线性插值到像素分辨率，再做平均池化平滑，生成一段连续取值的过渡带。过渡宽度由参数 sigma 控制；我们取 sigma 等于 0.3、块大小等于 8 时效果最好，大约形成一到两个像素宽的软边界。
-
-**结果：** 边界像素会同时接受两路视图的软监督，梯度不再硬切，解剖边界也更容易被学得一致、连贯。
+**中文**  
+由此提出可验证假设：用互补掩码保留完整信息，而不是打乱或丢弃信息，就能最大化空间信息利用，得到更准确、更连续的解剖分割。一句话：把无标签图分成两个互补视图互相教学，合起来仍覆盖整图、像素不丢。
 
 ---
 
-## 第 9 页｜结果：ACDC 上的 SOTA 表现
+## Slide 5 · II · SpaCon / CMC（~50s｜累计 3:05）
 
-实验部分，我们先看 ACDC 心脏 MRI 数据集。
+**English**  
+Based on this idea, we propose SpaCon. Inspired by masked autoencoders, covering random regions can force the model to predict the masked area, produce higher-quality pseudo-labels, and help alleviate edge artifacts and under-used spatial context in mixing-based methods like BCP. But unlike conventional masking, we do not throw pixels away. We introduce spatial complementary masking.
 
-在只有 **7 个有标签病例**，也就是大约 10% 标注的设置下，SpaCon 达到了 **Dice 90.31%**，**HD95 1.32 毫米**，ASD 0.46 毫米。相比我们复现的 BCP 基线，Dice 提升约 1.2 个百分点，HD95 改善约 1.73 毫米。
+Through the CMC module—Complementary Mask Consistency—each unlabeled image is partitioned into two fully complementary spatial views and fed into the student for mutual pseudo-label supervision. To further improve boundary processing, we design Smooth Complementary Mask, or SCM, which creates a continuous transition zone so that boundary pixels receive weighted supervision from both views at the same time.
 
-更值得注意的是，在更极端的 **3 个有标签病例**设置下，SpaCon 仍然能做到 Dice 89.33%、HD95 1.37 毫米，比基线高出约 2.83 个百分点，已经接近 7 例标注时的水平。这说明：标注越少，空间互补这种图内自监督越有价值。
+**中文**  
+据此提出 SpaCon。受 MAE 启发，随机遮挡可逼模型预测被盖区域、生成更高质量伪标签，也有助于缓解 BCP 一类方法的边缘伪影与空间利用不足。但与传统掩码不同，我们不丢像素，而是做空间互补掩码。
 
-各位可以看到表格里，我们在 DSC、Jaccard、HD95、ASD 这几个指标上都有很有竞争力的表现，尤其是边界距离指标的改善非常明显。
-
----
-
-## 第 10 页｜跨数据集与跨模态的定性结果
-
-数字之外，我们再看定性结果。
-
-左边是 ACDC。和 MT、MC-Net、UA-MT、BCP 等方法相比，SpaCon 的分割边界更锐利、更完整，这和我们在 HD95 上相对复现基线改善 1.73 毫米是一致的。
-
-右边是左心房 LA 数据集，在 8 个有标签病例的设置下。SpaCon 的边界更连续，对应 HD95 大约改善 0.69 毫米。定量上，8 例设置下我们达到 Dice 90.30%，相对复现基线提升约 1.16 个百分点。
-
-这说明：方法不只在二维心脏 MRI 上有效，迁移到三维左心房分割时，边界连续性同样有收益。
+CMC（互补掩码一致性）把每张无标签图分成两个完全互补的空间视图，送入学生做双向伪标签互监督。为进一步改善边界，我们设计 SCM（平滑互补掩码），在边缘形成连续过渡带，让边界像素同时接受来自两路视图的加权监督。
 
 ---
 
-## 第 11 页｜泛化与消融
+## Slide 6 · II · Objectives（~40s｜累计 3:45）
 
-这一页进一步看跨模态泛化和组件消融。
+**English**  
+Concretely, we pursue three objectives. First, propose the SpaCon framework as a lightweight local refinement module that bridges the gap between macro-level cross-image mixing and micro-level structural integrity. Second, introduce the CMC branch with a bidirectional blind-spot mechanism, so all pixel features are retained and complementary regions teach each other without information loss. Third, design the SCM algorithm to replace hard binary grid partitions with continuous-valued transition zones, smoothing gradients and eliminating grid artifacts—without introducing any extra learnable parameters.
 
-先看 **Pancreas CT**。在 10% 标注设置下，SpaCon 的 Dice 达到 **82.54%**，相对复现基线提升 **3 个百分点**；HD95 从 9.40 毫米降到 6.73 毫米。提升幅度比 20% 标注设置更大，再次说明：**标注越稀缺，图内互补自监督越有用。**
-
-再看右侧的**组件消融**，设置是 ACDC 的 7 例标注。
-
-- 只有复现的 BCP：Dice 89.11%，HD95 3.05 毫米；  
-- 只加 CMC、不加 BCP：Dice 能到 90.02%，但 HD95 反而变差，说明没有宏观分布对齐时，互教学信号不够稳；  
-- BCP 加上硬掩码 CMC：Dice 到 90.04%，但边界问题仍在；  
-- 再加上 SCM：Dice 到 **90.31%**，HD95 一下子降到 **1.32 毫米**。
-
-所以结论很清楚：  
-**BCP 负责宏观分布对齐，CMC 负责图内互补精炼，SCM 负责把边界伪影真正抹掉。三者缺一，效果都会打折。**
+**中文**  
+具体有三个目标。第一，提出 SpaCon 框架：轻量局部精炼模块，桥接宏观跨图混合与微观结构完整性。第二，引入 CMC 分支：双向盲区机制保留全部像素特征，互补区域互教学、信息不丢。第三，设计 SCM：用连续取值过渡带替换硬二值网格，平滑梯度、消除网格伪影，且不增加任何可学习参数。
 
 ---
 
-## 第 12 页｜讨论与局限
+## Slide 7 · III · Methods（~85s｜累计 5:10）
 
-那么，这项工作对这个领域意味着什么？
+**English**  
+Now let's look at the study design. As shown in the figure, SpaCon consists of two branches that share one student network and one EMA teacher network.
 
-我们认为，SpaCon 证明了一件事：**微观的图内监督，可以很好地补上宏观跨图像分布对齐的短板。** 两者结合，边界更锐、解剖结构更合理。同时，它复用原有教师网络，几乎不增加额外开销，适合作为即插即用的增强模块。
+On the left, the BCP branch performs macro-level distribution alignment through bidirectional cross-image mixing between labeled and unlabeled samples. On the right, the CMC branch performs micro-level intra-image refinement with complementary masked views. Within CMC, SCM further smooths mask boundaries to reduce grid artifacts. Both branches optimize through the same shared teacher and the same teacher pseudo-labels.
 
-当然，我们也有两点局限要坦诚说明。
+For CMC specifically: unlabeled images are partitioned into a regular grid to create two spatially complementary views. Early in training, a shared block ratio provides overlapping context so each view still sees enough of the image; this ratio then decays linearly toward strict spatial orthogonality—from about 0.4 down to zero over the first five thousand steps. A bidirectional blind-spot mechanism then lets each view supervise the invisible pixels of its complement, fully exploiting global context. We apply a stop-gradient operator to avoid the trivial collapse of both views to identical predictions.
 
-第一，当前网格划分方向固定，SCM 过渡宽度也是统一的。在结构特别复杂、高频细节很多的区域，固定过渡带偶尔可能把细节抹得过平。
+**中文**  
+接下来看方法设计。如图所示，SpaCon 包含两条分支，共用一个学生网络和一个 EMA 教师网络。
 
-第二，作为局部精炼模块，CMC 在训练早期仍依赖像 BCP 这样的宏观对齐基线来稳住伪标签质量；单独使用时，互教学有可能把错误也一起传播出去。
+左侧 BCP 分支通过有标签与无标签之间的双向跨图混合，做宏观分布对齐；右侧 CMC 分支用互补掩码视图做微观图内精炼；其中 SCM 进一步平滑掩码边界、削弱网格伪影。两条分支通过同一教师与同一伪标签联合优化。
 
----
-
-## 第 13 页｜未来工作
-
-针对这些局限，我们规划了三个方向。
-
-一是 **自适应采样**：用不确定性引导边界采样，让框架更少依赖外部基线，也能更精准地处理难边界。  
-二是 **解剖感知过渡**：让过渡宽度跟着局部边缘锐度变化，避免把高频解剖细节糊掉。  
-三是 **三维扩展**：进一步引入跨切片连续性约束，把 SpaCon 更好地适配复杂三维体数据。
+CMC 具体流程：无标签图按规则网格分成两个空间互补视图。训练早期用共享块比例保留重叠上下文，再线性衰减到严格正交——约从 0.4 降到 0，前五千步完成。双向盲区机制让每路监督互补区域中看不见的像素，充分利用全局上下文；并加 stop-gradient，避免两路塌缩成相同预测。
 
 ---
 
-## 第 14 页｜致谢与问答
+## Slide 8 · III · SCM（~55s｜累计 6:05）
 
-以上就是我们今天的全部汇报。
+**English**  
+Let me highlight the SCM design in three short phases.
 
-感谢各位老师和同学的聆听。我们的代码已经开源在 GitHub 上，欢迎大家试用和交流。我的邮箱是 foggywylsoh@gmail.com。
+Phase one, motivation: hard binary masks create an abrupt jump from zero to one at every grid-block edge. Boundary pixels are assigned to only one view and systematically excluded from the other view's gradient—along a grid-aligned stripe that does not correspond to any anatomical boundary.
 
-下面欢迎大家提问，我们一起讨论。谢谢！
+Phase two, pipeline: SCM replaces nearest-neighbor upsampling with bilinear interpolation followed by average pooling. This produces a continuous-valued transition zone. With sigma equal to 0.3 and block size eight, the soft band is roughly one to two pixels wide.
 
----
+Phase three, outcome: boundary pixels receive soft supervision from both views simultaneously, which encourages highly consistent anatomical boundaries.
 
-## 附：高频问答预案（可选）
+**中文**  
+SCM 设计分三步说明。
 
-**Q1：SpaCon 和普通掩码一致性有什么本质区别？**  
-A：普通掩码会丢掉区域；我们用互补掩码，两路合起来覆盖整图，信息不丢。再通过双向盲区互教学，让“看得见的一边”去监督“看不见的一边”，并加 stop-gradient 防止塌缩。
+动机：硬二值掩码在每个网格块边缘从 0 直接跳到 1，边界像素只分给一边，另一边系统性拿不到梯度——这条网格断裂线并不对应任何解剖边界。
 
-**Q2：为什么一定要和 BCP 一起用？**  
-A：消融显示，CMC 单独用时伪标签多样性不足，边界指标会变差。BCP 提供跨图像的宏观分布先验，CMC 在此之上做微观精炼，两者是互补关系，不是替代关系。
+流程：SCM 用双线性插值加平均池化替代最近邻上采样，形成连续取值过渡带；σ=0.3、块大小 8 时，软边界大约一到两个像素宽。
 
-**Q3：SCM 的 sigma 为什么选 0.3？**  
-A：太小接近硬边界，边界伪影消不掉；太大过渡带过宽，会稀释互补性、引入梯度模糊。sigma=0.3 在 ACDC 上取得了最好的 HD95。
-
-**Q4：额外计算开销大吗？**  
-A：不增加可学习参数，复用同一个 EMA 教师；互补两视图沿 batch 维拼接做一次前向。整体是轻量、即插即用的增强。
-
-**Q5：三维数据怎么处理？**  
-A：LA 和 Pancreas 使用 V-Net，掩码扩展到深度维，按 8×8×8 网格划分，SCM 用三线性插值，流程与二维一致。
+结果：边界像素同时接受两路软监督，解剖边界更一致、更连贯。
 
 ---
 
-## 附：关键数字速记卡（上台前扫一眼）
+## Slide 9 · IV · ACDC（~50s｜累计 6:55）
 
-| 场景 | 关键数字 |
-|------|----------|
-| ACDC 7 labeled | Dice **90.31%**，HD95 **1.32 mm**（相对复现基线 +1.20 pp / −1.73 mm） |
-| ACDC 3 labeled | Dice **89.33%**，HD95 **1.37 mm**（+2.83 pp） |
-| LA 8 labeled | Dice **90.30%**（+1.16 pp），HD95 6.59 mm（−0.69 mm） |
-| Pancreas 10% | Dice **82.54%**（**+3.00 pp**），HD95 6.73 mm |
-| 消融最优配置 | BCP + CMC + SCM（σ=0.3, s=8） |
-| 课程学习 | 共享比例 0.4 → 0，Tw≈5000 |
+**English**  
+Turning to results. On the ACDC cardiac MRI dataset with seven labeled cases—about ten percent annotation—SpaCon achieves a Dice score of 90.31 percent, an HD95 of 1.32 millimeters, and an ASD of 0.46 millimeters. Compared with our reproduced BCP baseline, this is roughly a 1.2-point Dice gain and a 1.73-millimeter improvement in HD95.
+
+With only three labeled cases, SpaCon still reaches 89.33 percent Dice and 1.37 millimeters HD95, outperforming the baseline by 2.83 points and nearly matching the seven-case accuracy. This suggests that intra-image complementary supervision is especially valuable when labels are scarce.
+
+**中文**  
+看实验结果。ACDC 心脏 MRI、七例有标签（约 10% 标注）下，SpaCon 达到 Dice 90.31%、HD95 1.32 毫米、ASD 0.46 毫米；相对我们复现的 BCP 基线，约提升 1.2 个百分点 Dice，HD95 改善约 1.73 毫米。
+
+仅三例有标签时，仍达 Dice 89.33%、HD95 1.37 毫米，比基线高 2.83 个百分点，已接近七例水平。说明标注越稀缺，图内互补自监督越有价值。
+
+---
+
+## Slide 10 · IV · Qualitative（~45s｜累计 7:40）
+
+**English**  
+Beyond the numbers, the qualitative comparisons tell the same story. On ACDC, SpaCon produces sharper and more complete segmentation boundaries than MT, MC-Net, UA-MT, and BCP, which is consistent with the 1.73-millimeter HD95 gain over the reproduced baseline.
+
+On the left-atrium LA dataset with eight labeled cases, SpaCon yields more continuous boundaries, aligning with about a 0.69-millimeter HD95 improvement, and reaches 90.30 percent Dice. So the benefit transfers from 2D cardiac MRI to 3D left-atrium segmentation.
+
+**中文**  
+定性结果与数字一致。ACDC 上，SpaCon 的边界比 MT、MC-Net、UA-MT、BCP 更锐利、更完整，与相对复现基线 HD95 改善 1.73 毫米相符。
+
+左心房 LA 数据集、八例有标签设置下，SpaCon 边界更连续，对应 HD95 约改善 0.69 毫米，Dice 达到 90.30%。收益从二维心脏 MRI 迁移到三维左心房分割。
+
+---
+
+## Slide 11 · IV · Ablation（~55s｜累计 8:35）
+
+**English**  
+We further evaluate generalization on NIH Pancreas CT. Under the ten-percent labeled setting, SpaCon reaches 82.54 percent Dice—three percentage points above the reproduced baseline—with clear reductions in HD95 as well. The larger gain at ten percent than at twenty percent again indicates that intra-image self-supervision helps most when labeled data is limited.
+
+The component ablation on ACDC with seven cases makes the roles clear. BCP alone gives 89.11 Dice and 3.05 HD95. CMC alone can raise Dice but worsens HD95, showing that mutual teaching needs a stable macro prior. BCP plus hard-mask CMC improves Dice, yet boundaries remain weak. Adding SCM finally reaches 90.31 Dice and 1.32 HD95. In short: BCP aligns distributions, CMC refines inside the image, and SCM removes boundary artifacts.
+
+**中文**  
+我们在 NIH Pancreas CT 上进一步验证泛化。10% 标注下，SpaCon 达到 Dice 82.54%，相对复现基线提升 3 个百分点，HD95 同步下降。10% 设置的提升大于 20%，再次说明标注越少，图内自监督越有用。
+
+ACDC 七例组件消融角色清晰：仅 BCP 为 89.11 / 3.05；仅 CMC 可抬 Dice 但 HD95 变差，说明互教学需要宏观先验；BCP+硬掩码 CMC 改善 Dice，边界仍弱；加上 SCM 达到 90.31 / 1.32。简言之：BCP 对齐分布，CMC 做图内精炼，SCM 消除边界伪影。
+
+---
+
+## Slide 12 · V · Discussion（~40s｜累计 9:15）
+
+**English**  
+What does this mean for the field? SpaCon shows that micro-level intra-image supervision complements macro-level cross-image distribution alignment. Together they produce sharper, more anatomically correct boundaries. It also works as a practical plug-and-play enhancement: we reuse the teacher network with minimal overhead and no additional learnable parameters.
+
+There are two main limitations. First, fixed grid orientations and uniform SCM transition widths may occasionally blur high-frequency anatomical details. Second, as a local refinement module, CMC currently relies on macro-level alignment from a baseline such as BCP to stay stable early in training.
+
+**中文**  
+对领域的意义：SpaCon 说明微观图内监督可以很好地补上宏观跨图分布对齐；两者结合，边界更锐、更符合解剖。同时它是实用的即插即用增强：复用教师网络，几乎零额外开销，不增加可学习参数。
+
+两点主要局限：一是网格方向与 SCM 过渡宽度固定，复杂高频解剖细节偶尔会被抹平；二是作为局部精炼模块，CMC 早期仍依赖 BCP 一类宏观对齐基线来稳住训练。
+
+---
+
+## Slide 13 · V · Future（~30s｜累计 9:45）
+
+**English**  
+For future work, we plan three directions. First, uncertainty-guided adaptive boundary sampling to strengthen standalone capability and reduce dependence on external baselines. Second, anatomy-aware transition widths tailored to local edge sharpness, so we do not blur fine details. Third, cross-slice continuity regularization to better adapt SpaCon to complex 3D volumetric scans.
+
+**中文**  
+未来三个方向：一是不确定性引导的自适应边界采样，增强独立能力、降低对外部基线依赖；二是解剖感知过渡宽度，按局部边缘锐度调节，避免抹掉细结构；三是跨切片连续性约束，更好适配复杂三维体数据。
+
+---
+
+## Slide 14 · Closing（~15s｜累计 10:00）
+
+**English**  
+That concludes my presentation. Thank you very much for your attention. Our code is available on GitHub, and I'd be happy to take your questions.
+
+**中文**  
+以上是我今天的汇报。非常感谢各位聆听。代码已开源在 GitHub，欢迎提问。
+
+---
+
+## 答辩预案（约 3 分钟 · 英文优先）
+
+**Q1: How is SpaCon different from standard masked consistency?**  
+SpaCon does not discard pixels. Complementary masks cover the full image together. Bidirectional blind-spot teaching lets each view supervise the other’s invisible region, with stop-gradient to prevent collapse.
+
+**Q2: Why couple CMC with BCP?**  
+Ablation shows CMC alone can raise Dice but hurt HD95. Without macro distribution alignment, mutual teaching is unstable. BCP provides the global prior; CMC refines locally.
+
+**Q3: Why σ = 0.3 for SCM?**  
+Too small ≈ hard boundary; too large dilutes complementarity and blurs gradients. σ=0.3 with s=8 gave the best HD95 on ACDC (1.32 mm).
+
+**Q4: Extra computational cost?**  
+No new learnable parameters; we reuse the EMA teacher. Complementary views are concatenated on the batch dimension for one forward pass—lightweight and plug-and-play.
+
+**Q5: How do you handle 3D data?**  
+On LA and Pancreas we use V-Net; masks extend to depth with 8×8×8 tiles; SCM uses trilinear upsampling, with the same curriculum and losses.
+
+---
+
+## 关键数字速记
+
+| Setting | Key numbers |
+|---------|-------------|
+| ACDC 7 labeled | Dice **90.31%**, HD95 **1.32 mm** (+1.20 pp / −1.73 mm vs BCP†) |
+| ACDC 3 labeled | Dice **89.33%**, HD95 **1.37 mm** (+2.83 pp) |
+| LA 8 labeled | Dice **90.30%** (+1.16 pp), HD95 −0.69 mm |
+| Pancreas 10% | Dice **82.54%** (**+3.00 pp**) |
+| Best config | BCP + CMC + SCM (σ=0.3, s=8) |
+| Curriculum | shared ratio 0.4 → 0, Tw≈5000 |
