@@ -1,0 +1,61 @@
+Slide 1. Opening.
+Good morning, everyone. My name is Shiqi Shi, from Wuhan University of Science and Technology. Today I'll present SpaCon: Spatial Complementary Consistency for Semi-Supervised Medical Image Segmentation. This work is co-authored with Zhengshi Chen and Juanjuan He.
+
+Slide 2. Agenda.
+Here is today's roadmap: research background, hypothesis and objectives, methodology, main results, then discussion and next steps.
+
+Slide 3. I · Background.
+Medical image segmentation is fundamental for diagnosis, surgical planning, and quantitative analysis. Deep learning has improved accuracy, but dense pixel-level annotation remains prohibitively expensive and depends on scarce clinical expertise. Semi-supervised learning is a natural choice: train with few labeled cases plus many unlabeled ones.
+
+Two recent paradigms work well: cross-image mixing, such as BCP, and masked image modeling. But both reduce input integrity . Conventional masking discards spatial regions. Cross-image replacement and rigid grid boundaries disrupt the semantic continuity of anatomy . The open question: can we use unlabeled data while keeping spatial completeness and continuous anatomical boundaries?
+
+Slide 4. II · Hypothesis.
+Our hypothesis : if we use complementary masks to retain complete information—instead of scrambling or discarding it—we can maximize spatial utilization and get more accurate, continuous anatomical segmentation. In short: two complementary views teach each other, yet together they still cover the full image.
+
+Slide 5. II · SpaCon / CMC.
+This leads to SpaCon. Inspired by masked autoencoders , random masks can force the model to predict covered regions and produce better pseudo-labels , also helping reduce edge artifacts in mixing methods like BCP. But we do not throw pixels away—we use spatial complementary masking.
+
+In CMC—Complementary Mask Consistency—each unlabeled image is split into two fully complementary spatial views for mutual pseudo-label supervision. For boundaries, Smooth Complementary Mask, or SCM, creates a transition zone so boundary pixels get weighted supervision from both views.
+
+Slide 6. II · Objectives.
+We set three objectives. First, propose SpaCon as a lightweight local refinement module bridging macro-level cross-image mixing and micro-level structural integrity. Second, introduce CMC with bidirectional blind-spot mutual teaching, retaining all pixels. Third, design SCM to replace hard binary grids with continuous transition zones, smoothing gradients and removing grid artifacts.
+
+Slide 7. III · Methods.
+As shown here, SpaCon has two branches sharing one student and one EMA , Exponential Moving Average, teacher.
+
+The BCP branch handles macro-level distribution alignment via cross-image mixing. The CMC branch handles micro-level intra-image refinement with complementary masks. SCM smooths mask boundaries to cut grid artifacts.
+
+For CMC: unlabeled images are partitioned into a regular grid to form two complementary views. Early on, a shared block ratio keeps overlapping context; it then decays linearly to strict spatial orthogonality —from about zero point four down to zero over the first five thousand steps. A bidirectional blind-spot mechanism lets each view supervise the invisible pixels of its complement. We apply stop-gradient to avoid collapse.
+
+Slide 8. III · SCM.
+SCM in three steps. Motivation: hard binary masks jump from zero to one at grid edges, so boundary pixels belong to only one view—along a stripe that is not an anatomical boundary.
+
+Pipeline: we replace nearest-neighbor upsampling with bilinear interpolation plus average pooling, forming a continuous transition zone. With sigma equal to zero point three and block size eight, the soft band is about one to two pixels wide.
+
+Outcome: boundary pixels receive soft supervision from both views, encouraging consistent anatomy.
+
+Slide 9. IV · ACDC.
+On ACDC with seven labeled cases—about ten percent annotation—SpaCon reaches Dice ninety point three one percent, HD95 one point three two millimeters, and ASD zero point four six millimeters. Versus our reproduced BCP baseline: about plus one point two Dice points, and minus one point seven three millimeters in HD95.
+
+With only three labeled cases, we still get Dice eighty-nine point three three percent and HD95 one point three seven millimeters—a two point eight three point gain, nearly matching the seven-case setting. So when labels are scarce, intra-image complementary supervision helps even more.
+
+Slide 10. IV · Qualitative.
+Qualitatively , on ACDC SpaCon yields sharper boundaries than MT, MC-Net, UA-MT, and BCP—consistent with the one point seven three millimeter HD95 gain.
+
+On the left-atrium LA dataset with eight labeled cases, boundaries are more continuous: about zero point six nine millimeters better HD95, and Dice ninety point three zero percent. Gains transfer from two-D cardiac MRI to three-D left-atrium segmentation.
+
+Slide 11. IV · Ablation.
+On NIH Pancreas CT with ten percent labels, Dice reaches eighty-two point five four percent—three points above the reproduced baseline. The larger gain at ten percent than at twenty percent again shows intra-image self-supervision helps most when labels are limited.
+
+Ablation on ACDC with seven cases: BCP alone gives Dice eighty-nine point one one and HD95 three point zero five. CMC alone can raise Dice but worsen HD95. BCP plus hard-mask CMC helps Dice, yet boundaries stay weak. Adding SCM reaches Dice ninety point three one and HD95 one point three two. So: BCP aligns distributions, CMC refines inside the image, SCM cleans boundary artifacts.
+
+Slide 12. V · Discussion.
+SpaCon shows that micro-level intra-image supervision complements macro-level cross-image distribution alignment, yielding sharper, more anatomical boundaries. It reuses the shared teacher network with little extra cost.
+
+Limitations: fixed grid orientation and uniform SCM width may blur high-frequency details; and as a local refinement module, CMC still relies on a macro baseline like BCP early in training.
+
+Slide 13. V · Future.
+Next: uncertainty-guided adaptive boundary sampling to reduce baseline dependence; anatomy-aware transition widths matched to local edge sharpness; and cross-slice continuity regularization for fuller three-D volumetric scans.
+
+Slide 14. Closing.
+Thank you for your attention. Our code is on GitHub, and I'm happy to take questions.
